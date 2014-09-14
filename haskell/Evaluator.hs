@@ -4,9 +4,6 @@ import Control.Applicative
 import Control.Monad
 import Data.Functor
 
-import Data.List (lookup)
-import Data.Maybe (fromMaybe)
-
 import Core
 
 getInteger :: E -> Integer
@@ -14,35 +11,38 @@ getInteger (I x) = x
 getInteger _ = error "not an integer"
 
 liftInteger :: (Integer -> Integer) -> E
-liftInteger f = let run = getInteger . evaluate in
+liftInteger f = let run = getInteger . evaluate [] in
                     F (\ x -> I (f (run x)))
 
 liftInteger2 :: (Integer -> Integer -> Integer) -> E
-liftInteger2 f = let run = getInteger . evaluate in
+liftInteger2 f = let run = getInteger . evaluate [] in
                      F (\ x -> F (\ y -> I (f (run x) (run y))))
 
 liftInteger3 :: (Integer -> Integer -> Integer -> Integer) -> E
-liftInteger3 f = let run = getInteger . evaluate in
+liftInteger3 f = let run = getInteger . evaluate [] in
                      F (\ x -> F (\ y -> F (\ z -> I (f (run x) (run y) (run z)))))
 
-evaluate :: E -> E
-evaluate (A f x) = apply (evaluate f) (evaluate x)
-evaluate (B e x) = evaluate x -- ignore
-evaluate (R k) = error ("not a name: " ++ k) -- ignore
-evaluate e = e
+evaluate :: [(String, E)] -> E -> E
+evaluate b (F f) = F (evaluate b . f)
+evaluate b (A f x) = apply (evaluate b f) (evaluate b x)
+evaluate b (B e x) = evaluate (e ++ b) x -- assoc
+evaluate b (R k) = fetch (get k b)
+evaluate b e = e
 
 apply :: E -> E -> E
 apply (F f) x = f x
 apply f _ = error ("not a function: " ++ show f)
 
-{-
-data E a = V a -- Value
-         | F (E a -> E a) -- Function
-         | A (E a) (E a) -- Application
-         | S String -- Symbol
-         | B String a (E a) -- Binding
-         deriving Show -- Expression
--}
+fetch (Just k) = k
+fetch _ = error ("not a name: " ++ "??")
+
+assoc :: Eq k => k -> v -> [(k, v)] -> [(k, v)]
+assoc k v xs = (k, v) : filter ((k /=) . fst) xs
+
+get :: Eq a => a -> [(a, b)] -> Maybe b
+get k ((x, y) : xys) | k == x = Just y
+                     | otherwise = lookup k xys
+get _ _ = Nothing
 
 {-
 instance Functor E where

@@ -24,11 +24,10 @@ showNicely p (C x) = show x
 showNicely p (S x) = show x
 showNicely p (F x) = wrapIf p $ "-> ?x " ++ showNicely True (x (R "?x"))
 showNicely p (A x y) = wrapIf p $ showNicely False x ++ " " ++ showNicely True y
-showNicely p (B e x) = wrapIf p $ "= " ++ show e ++ " " ++ showNicely True x
+showNicely p (B e x) = wrapIf p $ "=" ++ foldr (\ (k, v) y -> " " ++ k ++ " " ++ showNicely True v ++ y) "" e ++ " " ++ showNicely True x
 showNicely p (R x) = x
 
 {-
-
 letter = oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 sign = oneOf "+-"
 digit = oneOf "0123456789"
@@ -49,5 +48,4 @@ B = "=" ( R U )* U
 E = F
   | B
   | U+
-
 -}

@@ -17,8 +17,23 @@ import Core
 import Evaluator -- bad
 import Example -- bad
 
-doTheMario :: String -> Either ParseError E
-doTheMario = parse parseE "test"
+systemEnv :: [(String, E)]
+systemEnv = [("-", liftInteger2 (-)),
+             ("*", liftInteger2 (*)),
+             ("+", liftInteger2 (+))
+             -- , ("if", liftInteger2 (\ p c a -> if p then c else a))
+             -- , ("<", liftInteger2 (<))
+             -- , ("evaluate", liftInteger2 (evaluate))
+             ]
+
+testBoth :: String -> Either ParseError E
+testBoth s = evaluate systemEnv <$> testParse s
+
+testEvaluate :: E -> E
+testEvaluate = evaluate systemEnv
+
+testParse :: String -> Either ParseError E
+testParse = parse parseE "test"
 
 parseE :: Parser E
 parseE = do xs <- parseF <|> parseB <|> parseA
