@@ -16,15 +16,7 @@ import Core
 
 import Evaluator -- bad
 import Example -- bad
-
-systemEnv :: [(String, E)]
-systemEnv = [("-", liftInteger2 (-)),
-             ("*", liftInteger2 (*)),
-             ("+", liftInteger2 (+))
-             -- , ("if", liftInteger2 (\ p c a -> if p then c else a))
-             -- , ("<", liftInteger2 (<))
-             -- , ("evaluate", liftInteger2 (evaluate))
-             ]
+-- and the rest is even worse
 
 testBoth :: String -> Either ParseError E
 testBoth s = evaluate systemEnv <$> testParse s
@@ -36,7 +28,7 @@ testParse :: String -> Either ParseError E
 testParse = parse parseE "test"
 
 parseE :: Parser E
-parseE = do xs <- parseF <|> parseB <|> parseA
+parseE = do xs <- try parseF <|> try parseB <|> parseA
             return xs
 
 parseA :: Parser E
@@ -53,11 +45,12 @@ parseF = do string "->"
 
 parseB :: Parser E
 parseB = do string "="
-            xs <- parseW *> parseWhat
-            ys <- parseW *> parseU
+            xys <- many (try $ do q <- parseW *> parseWhat
+                                  m <- parseW *> parseU
+                                  return (q, m))
             parseW
             zs <- parseU
-            return (B [(xs, ys)] zs) -- disgusting
+            return (B xys zs) -- disgusting
 
 parseU :: Parser E
 parseU = do x <- parseG parseE <|> parseR <|> parseV -- dubious
@@ -69,6 +62,7 @@ parseG p = do char '('
               xs <- p
               parseW
               char ')'
+              parseW
               return xs
 
 parseV :: Parser E

@@ -124,12 +124,12 @@ exampleDataHard = " \
 
 exampleLazinessEasy :: String
 exampleLazinessEasy = " \
-\ if (< 2 3)   \
-\    13        \
-\    undefined \
+\ if (< 2 3)                  \
+\    13                       \
+\    (= f (-> x (f x)) (f f)) \
 \ "
 
 exampleLazinessHard :: String
 exampleLazinessHard = " \
-\ always 13 undefined \
+\ always 13 (= f (-> x (f x)) (f f)) \
 \ "
