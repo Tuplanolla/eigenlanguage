@@ -26,26 +26,3 @@ showNicely p (F x) = wrapIf p $ "-> ?x " ++ showNicely True (x (R "?x"))
 showNicely p (A x y) = wrapIf p $ showNicely False x ++ " " ++ showNicely True y
 showNicely p (B e x) = wrapIf p $ "=" ++ foldr (\ (k, v) y -> " " ++ k ++ " " ++ showNicely True v ++ y) "" e ++ " " ++ showNicely True x
 showNicely p (R x) = x
-
-{-
-letter = oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-sign = oneOf "+-"
-digit = oneOf "0123456789"
-special = oneOf "!$%&*+-./:;<=>?@[\]^_`{|}~"
-reserved = oneOf "\"#'(),"
-free = letter
-     | digit
-     | special
-any = reserved
-    | free
-V = "'" ( notExactly "'" & actuallyAny )+ "'"
-  | "\"" ( notExactly "\"" & actuallyAny )* "\""
-  | sign? digit+
-R = notExactly "->" & notExactly "=" & free any*
-U = "(" E ")" | V | R
-F = "->" R+ U
-B = "=" ( R U )* U
-E = F
-  | B
-  | U+
--}
