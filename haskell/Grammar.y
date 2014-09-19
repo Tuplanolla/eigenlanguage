@@ -1,90 +1,142 @@
 {module Grammar where}
 
-%error {choke}
-
-%name decompose
-
 %tokentype {Token}
 
-%token symbol {TokenSymbol}
-       "`"    {TokenData}
-       ","    {TokenCode}
-       "("    {TokenGroupBegin}
-       ")"    {TokenGroupEnd}
+%token PACKING   {TPacking}
+       UNPACKING {TUnpacking}
+       OPENING   {TOpening}
+       CLOSING   {TClosing}
+       SYMBOL    {TSymbol $$}
+       --
+       LOGICAL   {TLogical $$}
+       INTEGER   {TInteger $$}
+       CHARACTER {TCharacter $$}
+       STRING    {TString $$}
+
+%error {eigenfail}
+
+%name eigenparse program
 
 %%
 
--- nonterminals
+program :: {Structure}
+        : pieces {$1}
 
-program : pieces
+piece : PACKING dpiece {$2}
+      | group          {$1}
+      | value          {$1}
+      | SYMBOL         {SSymbol $1}
 
-piece : "`" dpiece
-      | group
-      | symbol
+dpiece : UNPACKING piece {$2}
+       | dgroup          {$1}
+       | value           {$1}
+       | SYMBOL          {SSymbol $1}
 
-dpiece : "," piece
-       | dgroup
-       | symbol
+group : OPENING pieces CLOSING {$2}
 
-group : opening pieces closing
+dgroup : OPENING dpieces CLOSING {$2}
 
-dgroup : opening dpieces closing
+value : LOGICAL   {SLogical $1}
+      | INTEGER   {SInteger $1}
+      | CHARACTER {SCharacter $1}
+      | STRING    {SString $1}
 
-symbol : letter
-       -- | letter anythingButReserved
-       | letter anything
+pieces : piece        {$1}
+       | pieces piece {SApplication $1 $2}
 
-value : integer
-      | character
-      | string
+dpieces : dpiece         {$1}
+        | dpieces dpiece {SApplication $1 $2}
 
-integer : sign digits
-        | digits
+symbols : SYMBOL         {SSymbol $1}
+        | symbols SYMBOL {SApplication $1 (SSymbol $2)}
 
--- character : apostrophe anythingButApostrophe apostrophe
-character : apostrophe anything apostrophe
+{
 
--- string : quote anythingButQuote quote
-string : quote anything quote
+data Token = TPacking
+           | TUnpacking
+           | TOpening
+           | TClosing
+           | TSymbol String
+           --
+           | TLogical Bool
+           | TInteger Integer
+           | TCharacter Char
+           | TString String
+           deriving Show
 
--- nonterminal groups
+data Structure = SApplication Structure Structure
+               | SSymbol String
+               --
+               | SLogical Bool
+               | SInteger Integer
+               | SCharacter Char
+               | SString String
+               deriving Show
 
-pieces : piece
-       | pieces piece
+eigenfail :: [Token] -> a
+eigenfail = error . ("failed to parse: " ++) . showTokens
 
-dpieces : dpiece
-        | dpieces dpiece
+showTokens :: [Token] -> String
+showTokens = foldr foldToken ""
 
-symbols : symbol
-        | symbols symbol
+foldToken :: Token -> String -> String
+foldToken x y @ (_ : _) = show x ++ ' ' : y
+foldToken x _ = show x
 
+eigenlex :: String -> [Token]
+eigenlex = const [TLogical True]
+
+main :: IO ()
+main = print . eigenparse . eigenlex =<< getContents
+
+}
+
+{-
+import Data.Map
+
+data Expression = EFunction (Expression -> Expression)
+                | EApplication Expression Expression
+                | EBinding (Map String Expression) Expression
+                | ESymbol String
+                | EPair Expression Expression
+                --
+                | ELogical Bool
+                | EInteger Integer
+                | ECharacter Char
+                | EString String
+                deriving Show
+-}
+
+{-
 -- terminals
 
-quote = '"'
+quote : '"'
 
-hash = "#"
+hash : "#"
 
-apostrophe = "'"
+apostrophe : "'"
 
-opening = "("
+opening : "("
 
-closing = ")"
+closing : ")"
 
-comma = ","
+prime : "`"
 
-sign = "+" | "-"
+dprime : ","
 
-letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+sign : "+" | "-"
+
+letter : "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 
 digit : "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
-specialSansQuoteHashApoOparCpar = "!" | "$" | "%" | "&" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
+specialSansQuoteHashApoOparCpar : "!" | "$" | "%" | "&" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
 
-special = specialSansQuoteHashApoOparCpar | quote | hash | apostrophe | opening | closing
+special : specialSansQuoteHashApoOparCpar | quote | hash | apostrophe | opening | closing
 
--- special = "!" | '"' | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
+-- special : "!" | '"' | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
 
-anything = letter
+anything : letter
          | digit
          | specialSansQuoteHashApoOparCpar -- eh
 
@@ -99,42 +151,6 @@ letters : letter
 others : other
        | others other
 
-{-
-choke :: [Token] -> a
-choke _ = error ("Parse error\n")
-
-data Exp = Let String Exp Exp
-         | Exp1 Exp1
-data Exp1 = Plus Exp1 Term
-          | Minus Exp1 Term
-          | Term Term
-data Term = Times Term Factor
-          | Div Term Factor
-          | Factor Factor
-data Factor = Int Int
-            | Var String
-            | Brack Exp
-data Token = TokenLet
-           | TokenIn
-           | TokenInt Int
-           | TokenVar String
-           | TokenEq
-           | TokenPlus
-           | TokenMinus
-           | TokenTimes
-           | TokenDiv
-           | TokenGroupBegin
-           | TokenGroupEnd
-data E = L Bool -- Logical
-       | I Integer -- Integer
-       | C Char -- Character
-       | S String -- String
-       | F (E -> E) -- Function
-       | A E E -- Application
-       | B [(String, E)] E -- Binding
-       | R String -- Reference
-       deriving Show -- Expression
-
 lexington :: String -> [Token]
 lexington [] = []
 lexington (c : cs) | isSpace c = lexer cs
@@ -146,7 +162,7 @@ lexington ('-' : cs) = TokenMinus : lexer cs
 lexington ('*' : cs) = TokenTimes : lexer cs
 lexington ('/' : cs) = TokenDiv : lexer cs
 lexington ('(' : cs) = TokenGroupBegin : lexer cs
-lexington (')' : cs) = gokenGroupEnd : lexer cs
+lexington (')' : cs) = TokenGroupEnd : lexer cs
 
 lexNum cs = TokenInt (read num) : lexer rest
             where (num,rest) = span isDigit cs
