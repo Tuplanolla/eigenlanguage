@@ -1,4 +1,9 @@
-{module Grammar where}
+{
+module Grammar where
+
+import Control.Applicative
+import Data.Char
+}
 
 %tokentype {Token}
 
@@ -8,7 +13,6 @@
        CLOSING   {TClosing}
        SYMBOL    {TSymbol $$}
        --
-       LOGICAL   {TLogical $$}
        INTEGER   {TInteger $$}
        CHARACTER {TCharacter $$}
        STRING    {TString $$}
@@ -22,43 +26,42 @@
 program :: {Structure}
         : pieces {$1}
 
-piece : PACKING dpiece {$2}
-      | group          {$1}
-      | value          {$1}
-      | SYMBOL         {SSymbol $1}
+piece : PACKING unpiece {$2}
+      | group           {$1}
+      | value           {$1}
+      | SYMBOL          {SSymbol $1}
 
-dpiece : UNPACKING piece {$2}
-       | dgroup          {$1}
-       | value           {$1}
-       | SYMBOL          {SSymbol $1}
+unpiece : UNPACKING piece {$2}
+        | ungroup         {$1}
+        | value           {$1}
+        | SYMBOL          {SSymbol $1}
 
 group : OPENING pieces CLOSING {$2}
 
-dgroup : OPENING dpieces CLOSING {$2}
+ungroup : OPENING unpieces CLOSING {$2}
 
-value : LOGICAL   {SLogical $1}
-      | INTEGER   {SInteger $1}
+value : INTEGER   {SInteger $1}
       | CHARACTER {SCharacter $1}
       | STRING    {SString $1}
 
 pieces : piece        {$1}
        | pieces piece {SApplication $1 $2}
 
-dpieces : dpiece         {$1}
-        | dpieces dpiece {SApplication $1 $2}
+unpieces : unpiece          {$1}
+         | unpieces unpiece {SApplication $1 $2}
 
 symbols : SYMBOL         {SSymbol $1}
         | symbols SYMBOL {SApplication $1 (SSymbol $2)}
 
 {
 
-data Token = TPacking
+data Token = TIndentation Integer
+           | TPacking
            | TUnpacking
            | TOpening
            | TClosing
            | TSymbol String
            --
-           | TLogical Bool
            | TInteger Integer
            | TCharacter Char
            | TString String
@@ -67,7 +70,6 @@ data Token = TPacking
 data Structure = SApplication Structure Structure
                | SSymbol String
                --
-               | SLogical Bool
                | SInteger Integer
                | SCharacter Char
                | SString String
@@ -83,8 +85,53 @@ foldToken :: Token -> String -> String
 foldToken x y @ (_ : _) = show x ++ ' ' : y
 foldToken x _ = show x
 
+-- Lexer.hs
+
+eigenflex :: String -> a
+eigenflex = error . ("failed to lex: " ++)
+
 eigenlex :: String -> [Token]
-eigenlex = const [TLogical True]
+eigenlex y @ (x : xs) | isSpace x = eigenlex xs
+                      | x == '`' = TPacking : eigenlex xs
+                      | x == ',' = TUnpacking : eigenlex xs
+                      | x == '(' = TOpening : eigenlex xs
+                      | x == ')' = TClosing : eigenlex xs
+                      | otherwise = check (lexInteger y <|> lexCharacter y
+                                                        <|> lexString y
+                                                        <|> lexSymbol y)
+                                    where check (Just (x, y)) = x : eigenlex y
+                                          check _ = eigenflex y
+eigenlex _ = []
+
+-- Terrible.hs
+
+lexInteger :: String -> Maybe (Token, String)
+lexInteger x = let (y, z) = span isDigit x in
+                   case y of
+                        _ : _ -> Just (TInteger (read y), z)
+                        _ -> Nothing
+
+lexCharacter :: String -> Maybe (Token, String)
+lexCharacter ('\'' : x) = let (y, z) = span (/= '\'') x in
+                              case y of
+                                   w : _ -> Just (TCharacter w, z)
+                                   _ -> Nothing
+lexCharacter _ = Nothing
+
+lexString :: String -> Maybe (Token, String)
+lexString ('"' : x) = let (y, z) = span (/= '"') x in
+                          case y of
+                               _ : _ -> Just (TString y, z)
+                               _ -> Nothing
+lexString _ = Nothing
+
+lexSymbol :: String -> Maybe (Token, String)
+lexSymbol x = let (y, z) = span (not . \ x -> isSpace x || x == ')') x in
+                  case y of
+                       _ : _ -> Just (TSymbol y, z)
+                       _ -> Nothing
+
+-- Main.hs
 
 main :: IO ()
 main = print . eigenparse . eigenlex =<< getContents
