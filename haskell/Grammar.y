@@ -1,11 +1,3 @@
-{-
-letter = oneOf "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-sign = oneOf "+-"
-digit = oneOf "0123456789"
-special = oneOf "!$%&*+-./:;<=>?@[\]^_`{|}~"
-reserved = oneOf "\"#'(),"
--}
-
 {module Grammar where}
 
 %error {choke}
@@ -15,57 +7,97 @@ reserved = oneOf "\"#'(),"
 %tokentype {Token}
 
 %token symbol {TokenSymbol}
-       "->"   {TokenFunction}
-       "="    {TokenBinding}
-       "'"    {TokenDataification}
-       ","    {TokenCodeification}
+       "`"    {TokenData}
+       ","    {TokenCode}
        "("    {TokenGroupBegin}
        ")"    {TokenGroupEnd}
 
 %%
 
-expression : function
-           | binding
-           | dataification
-           | atoms
+-- nonterminals
 
-function : "->" symbols atom
+program : pieces
+
+piece : "`" dpiece
+      | group
+      | symbol
+
+dpiece : "," piece
+       | dgroup
+       | symbol
+
+group : opening pieces closing
+
+dgroup : opening dpieces closing
+
+symbol : letter
+       -- | letter anythingButReserved
+       | letter anything
+
+value : integer
+      | character
+      | string
+
+integer : sign digits
+        | digits
+
+-- character : apostrophe anythingButApostrophe apostrophe
+character : apostrophe anything apostrophe
+
+-- string : quote anythingButQuote quote
+string : quote anything quote
+
+-- nonterminal groups
+
+pieces : piece
+       | pieces piece
+
+dpieces : dpiece
+        | dpieces dpiece
 
 symbols : symbol
         | symbols symbol
 
-atom : group
-     | symbol
+-- terminals
 
-group : "(" expression ")"
+quote = '"'
 
-symbol : "anything"
+hash = "#"
 
-binding : "=" relations atom
+apostrophe = "'"
 
-relations : relation
-          | relations relation
+opening = "("
 
-relation : symbol atom
+closing = ")"
 
-dataification : "'" datum
+comma = ","
 
-datum : codeification
-      | list
-      | symbol
+sign = "+" | "-"
 
-list : "(" elements ")"
+letter = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 
-elements : element
-         | elements element
+digit : "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
-element : value
-        | datum
+specialSansQuoteHashApoOparCpar = "!" | "$" | "%" | "&" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
 
-codeification : "," atom
+special = specialSansQuoteHashApoOparCpar | quote | hash | apostrophe | opening | closing
 
-atoms : atom
-      | atoms atom
+-- special = "!" | '"' | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "\\" | "]" | "^" | "_" | "`" | "{" | "|" | "}" | "~"
+
+anything = letter
+         | digit
+         | specialSansQuoteHashApoOparCpar -- eh
+
+-- terminal groups
+
+digits : digit
+       | digits digit
+
+letters : letter
+        | letters letter
+
+others : other
+       | others other
 
 {-
 choke :: [Token] -> a

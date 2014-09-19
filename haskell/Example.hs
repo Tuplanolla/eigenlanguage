@@ -51,22 +51,22 @@ exampleArithmeticHard = " \
 
 exampleBindingEasy :: String
 exampleBindingEasy = " \
-\ - (+ 2 (= x 3       \
+\ - (+ 2 (= (x 3)     \
 \           (* x 4))) \
 \   1                 \
 \ "
 
 exampleBindingHard :: String
 exampleBindingHard = " \
-\ - (+ 2 (= x 3       \
-\           y 4       \
+\ - (+ 2 (= (x 3      \
+\            y 4)     \
 \           (* x y))) \
 \   1                 \
 \ "
 
 exampleScopeEasy :: String
 exampleScopeEasy = " \
-\ = x 4                \
+\ = (x 4)              \
 \   (- (+ 2            \
 \         (= y 3       \
 \            (* y x))) \
@@ -75,7 +75,7 @@ exampleScopeEasy = " \
 
 exampleScopeHard :: String
 exampleScopeHard = " \
-\ = x 2                \
+\ = (x 2)              \
 \   (- (+ x            \
 \         (= x (- y 1) \
 \            y 4       \
@@ -90,46 +90,48 @@ exampleFunctionEasy = " \
 
 exampleFunctionHard :: String
 exampleFunctionHard = " \
-\ (-> x y (+ x y)) ((-> x 2) 3) 11 \
+\ -> (x y) (+ x y) (-> x 2 3) 11 \
 \ "
 
 exampleRecursionEasy :: String
 exampleRecursionEasy = " \
-\ = f (-> n                       \
-\         (if (< n 2)             \
-\             n                   \
-\             (* n (f (- n 1))))) \
-\   (- (f 4) 11)                  \
+\ = (f (-> n                        \
+\          (if (< n 2)              \
+\              n                    \
+\              (* n (f (- n 1)))))) \
+\   (- (f 4) 11)                    \
 \ "
 
 exampleRecursionHard :: String
 exampleRecursionHard = " \
-\ = f (-> n                     \
-\         (if (< n 2)           \
-\             n                 \
-\             (+ (f (- n 1))    \
-\                (f (- n 2))))) \
-\   (f 7)                       \
+\ = (f (-> n                      \
+\          (if (< n 2)            \
+\              n                  \
+\              (+ (f (- n 1))     \
+\                 (f (- n 2)))))) \
+\   (f 7)                         \
 \ "
 
 exampleDataEasy :: String
 exampleDataEasy = " \
-\ + (evaluate '(* 2 3)) 7 \
+\ + (evaluate (` (* 2 3))) 7 \
 \ "
 
 exampleDataHard :: String
 exampleDataHard = " \
-\ + (evaluate '(* 2 ,(always 3 4))) 7 \
+\ + (evaluate (` (* 2 (, (always 3 4))))) 7 \
 \ "
 
 exampleLazinessEasy :: String
 exampleLazinessEasy = " \
-\ if (< 2 3)                  \
-\    13                       \
-\    (= f (-> x (f x)) (f f)) \
+\ if (< 2 3)             \
+\    13                  \
+\    (= (f (-> x (f x))) \
+\       (f f))           \
 \ "
 
 exampleLazinessHard :: String
 exampleLazinessHard = " \
-\ always 13 (= f (-> x (f x)) (f f)) \
+\ always 13 (= (f (-> x (f x))) \
+\              (f f))           \
 \ "
