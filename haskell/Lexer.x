@@ -1,20 +1,23 @@
-{module Lexer where}
+{
+module Lexer where
+}
 
 %wrapper "basic"
 
-$space = [\t\n\v\f\r\ ]
-$digit = [0-9]
+$break = [\t\n\v\f\r\ ]
+$linebreak = [\n\r]
 
-tokens :- $space+ ;
-          "#\ ".* ;
-          ` {const LPacking}
-          \, {const LUnpacking}
-          \( {const LOpening}
-          \) {const LClosing}
-          [\+\-]?$digit+(\^$digit+)?(_$digit+)? {LInteger . readInteger}
-          '(\\.|[^\\'])+' {LCharacter . readCharacter}
-          \"(\\.|[^\\\"])*\" {LString . readString}
-          ~[`\,\(\)$space]+ {LSymbol}
+lexemes :- $break+                            ;
+           \#\ ~$linebreak*                   ; -- This is wrong.
+           `                                  {const LPacking}
+           \,                                 {const LUnpacking}
+           \(                                 {const LOpening}
+           \)                                 {const LClosing}
+           [\+\-]?[0-9]+(\^[0-9]+)?(_[0-9]+)? {LInteger . readInteger}
+           -- This should cover the cyclotomic subfield.
+           '(\\.|[^\\'])+'                    {LCharacter . readCharacter}
+           \"(\\.|[^\\\"])*\"                 {LString . readString}
+           ~[\#`\,\(\)$break]+                {LSymbol}
 
 {
 data Lexeme = LPacking
@@ -28,9 +31,12 @@ data Lexeme = LPacking
             | LString String
             deriving Show
 
-readInteger = read -- not quite
+readInteger :: String -> Integer
+readInteger = read -- This is wrong.
 
-readCharacter = head -- not quite
+readCharacter :: String -> Char
+readCharacter = head -- This is wrong.
 
-readString = id -- not quite
+readString :: String -> String
+readString = id -- This is wrong.
 }

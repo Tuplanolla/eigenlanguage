@@ -59,12 +59,6 @@ data Parse = PApplication Parse Parse
            deriving Show
 
 eigenfail :: [Lexeme] -> a
-eigenfail = error . ("failed to parse: " ++) . showLexemes
-
-showLexemes :: [Lexeme] -> String
-showLexemes = foldr foldLexeme ""
-
-foldLexeme :: Lexeme -> String -> String
-foldLexeme x y @ (_ : _) = show x ++ ' ' : y
-foldLexeme x _ = show x
+eigenfail (x : _) = error ("failed to parse: " ++ show x)
+eigenfail _ = error "failed to parse"
 }
