@@ -2,6 +2,22 @@ module Core where
 
 import Text.Show.Functions ()
 
+{-
+import Data.Map
+
+data Expression = EFunction (Expression -> Expression)
+                | EApplication Expression Expression
+                | EBinding (Map String Expression) Expression
+                | ESymbol String
+                | EPair Expression Expression
+                --
+                | ELogical Bool
+                | EInteger Integer
+                | ECharacter Char
+                | EString String
+                deriving Show
+-}
+
 data E = L Bool -- Logical
        | I Integer -- Integer
        | C Char -- Character
