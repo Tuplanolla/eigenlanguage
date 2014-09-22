@@ -6,12 +6,14 @@ import Lexer
 
 %tokentype {Lexeme}
 
-%token PACKING   {LPacking}
-       UNPACKING {LUnpacking}
-       OPENING   {LOpening}
-       CLOSING   {LClosing}
+%token COMMENT   {LComment}
+       PACK      {LPack}
+       UNPACK    {LUnpack}
+       OPEN      {LOpen}
+       CLOSE     {LClose}
        SYMBOL    {LSymbol $$}
        --
+       NOTHING   {LNothing}
        INTEGER   {LInteger $$}
        CHARACTER {LCharacter $$}
        STRING    {LString $$}
@@ -25,34 +27,41 @@ import Lexer
 program :: {Parse}
         : pieces {$1}
 
-piece : PACKING unpiece {$2}
-      | group           {$1}
-      | value           {$1}
-      | SYMBOL          {PSymbol $1}
+piece : COMMENT piece {PComment}
+      | PACK unpiece  {PPack $2}
+      | group         {$1}
+      | value         {$1}
+      | SYMBOL        {PSymbol $1}
 
-unpiece : UNPACKING piece {$2}
+unpiece : COMMENT unpiece {PComment}
+        | UNPACK piece    {PUnpack $2}
         | ungroup         {$1}
         | value           {$1}
         | SYMBOL          {PSymbol $1}
 
-group : OPENING pieces CLOSING {$2}
+group : OPEN pieces CLOSE {$2}
 
-ungroup : OPENING unpieces CLOSING {$2}
+ungroup : OPEN unpieces CLOSE {$2}
 
-value : INTEGER   {PInteger $1}
+value : NOTHING   {PNothing}
+      | INTEGER   {PInteger $1}
       | CHARACTER {PCharacter $1}
       | STRING    {PString $1}
 
 pieces : piece        {$1}
-       | pieces piece {PApplication $1 $2}
+       | pieces piece {PApply $1 $2}
 
 unpieces : unpiece          {$1}
-         | unpieces unpiece {PApplication $1 $2}
+         | unpieces unpiece {PApply $1 $2}
 
 {
-data Parse = PApplication Parse Parse
+data Parse = PComment
+           | PPack Parse
+           | PUnpack Parse
+           | PApply Parse Parse
            | PSymbol String
            --
+           | PNothing
            | PInteger Integer
            | PCharacter Char
            | PString String

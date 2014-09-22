@@ -3,6 +3,7 @@ module Evaluator where
 import Control.Applicative
 import Control.Monad
 import Data.Functor
+import Data.Map
 
 import Core
 

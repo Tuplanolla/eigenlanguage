@@ -1,13 +1,13 @@
 module Main where
 
-import Core
-import Evaluator
+-- import Evaluator
 import Example
+import Formatter
 import Lexer
 import Parser
 
 main :: IO ()
-main = print . eigenparse . alexScanTokens =<< getContents
+main = putStrLn . formatUnwrapped . eigenparse . alexScanTokens =<< getContents
 
 loop :: IO ()
 loop = undefined
