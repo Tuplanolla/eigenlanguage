@@ -5,7 +5,9 @@ import Control.Monad
 import Data.Functor
 import Data.Map
 
-import Core
+import Parser
+
+evaluateNowhere = undefined
 
 systemEnv :: [(String, E)]
 systemEnv = [("-", liftInteger2 (-)),

@@ -402,9 +402,9 @@ happyThen1 m k tks = (>>=) m (\a -> k a tks)
 happyReturn1 :: () => a -> b -> HappyIdentity a
 happyReturn1 = \a tks -> (return) a
 happyError' :: () => [(Lexeme)] -> HappyIdentity a
-happyError' = HappyIdentity . eigenfail
+happyError' = HappyIdentity . happyError
 
-eigenparse tks = happyRunIdentity happySomeParser where
+happyGatherParses tks = happyRunIdentity happySomeParser where
   happySomeParser = happyThen (happyParse action_0 tks) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
 
 happySeq = happyDontSeq
@@ -422,9 +422,9 @@ data Parse = PComment
            | PString String
            deriving Show
 
-eigenfail :: [Lexeme] -> a
-eigenfail (x : _) = error ("failed to parse: " ++ show x)
-eigenfail _ = error "failed to parse"
+happyError :: [Lexeme] -> a
+happyError (x : _) = error ("failed to parse: " ++ show x)
+happyError _ = error "failed to parse"
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "<command-line>" #-}

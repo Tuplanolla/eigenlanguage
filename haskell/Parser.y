@@ -18,9 +18,9 @@ import Lexer
        CHARACTER {LCharacter $$}
        STRING    {LString $$}
 
-%error {eigenfail}
+%name happyGatherParses
 
-%name eigenparse program
+%error {happyError}
 
 %%
 
@@ -67,7 +67,7 @@ data Parse = PComment
            | PString String
            deriving Show
 
-eigenfail :: [Lexeme] -> a
-eigenfail (x : _) = error ("failed to parse: " ++ show x)
-eigenfail _ = error "failed to parse"
+happyError :: [Lexeme] -> a
+happyError (x : _) = error ("failed to parse: " ++ show x)
+happyError _ = error "failed to parse"
 }

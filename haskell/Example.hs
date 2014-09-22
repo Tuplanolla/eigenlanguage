@@ -135,3 +135,18 @@ exampleLazinessHard = " \
 \ always 13 (= (f (-> x (f x))) \
 \              (f f))           \
 \ "
+
+exampleCommentsEasy :: String
+exampleCommentsEasy = " \
+\ - (* (+ 2 #comment 3)   \
+\      (+ 4 5)) # comment \
+\   32                    \
+\ "
+
+exampleCommentsHard :: String
+exampleCommentsHard = " \
+\ - (* (+ 2 #(nested #comment # with  \
+\             `multiple #(#lines)) 3) \
+\      (+ 4 5 #!))                    \
+\   32                                \
+\ "
