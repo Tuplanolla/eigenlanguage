@@ -1,14 +1,18 @@
 {-# OPTIONS_GHC -w #-}
 module Parser where
 
+import Data.Array (Array)
+import Data.Map (Map)
+import Text.Show.Functions ()
+
 import Lexer
 
 -- parser produced by Happy Version 1.19.0
 
 data HappyAbsSyn t5 t6 t7 t8 t9 t10 t11
-	= HappyTerminal (Lexeme)
+	= HappyTerminal (Token)
 	| HappyErrorToken Int
-	| HappyAbsSyn4 (Parse)
+	| HappyAbsSyn4 (Expression)
 	| HappyAbsSyn5 t5
 	| HappyAbsSyn6 t6
 	| HappyAbsSyn7 t7
@@ -221,14 +225,14 @@ happyReduce_2 = happySpecReduce_2  5 happyReduction_2
 happyReduction_2 _
 	_
 	 =  HappyAbsSyn5
-		 (PComment
+		 (EComment
 	)
 
 happyReduce_3 = happySpecReduce_2  5 happyReduction_3
 happyReduction_3 (HappyAbsSyn6  happy_var_2)
 	_
 	 =  HappyAbsSyn5
-		 (PPack happy_var_2
+		 (EApply (ESymbol "`") happy_var_2
 	)
 happyReduction_3 _ _  = notHappyAtAll 
 
@@ -247,9 +251,9 @@ happyReduction_5 (HappyAbsSyn9  happy_var_1)
 happyReduction_5 _  = notHappyAtAll 
 
 happyReduce_6 = happySpecReduce_1  5 happyReduction_6
-happyReduction_6 (HappyTerminal (LSymbol happy_var_1))
+happyReduction_6 (HappyTerminal (TSymbol happy_var_1))
 	 =  HappyAbsSyn5
-		 (PSymbol happy_var_1
+		 (ESymbol happy_var_1
 	)
 happyReduction_6 _  = notHappyAtAll 
 
@@ -257,14 +261,14 @@ happyReduce_7 = happySpecReduce_2  6 happyReduction_7
 happyReduction_7 _
 	_
 	 =  HappyAbsSyn6
-		 (PComment
+		 (EComment
 	)
 
 happyReduce_8 = happySpecReduce_2  6 happyReduction_8
 happyReduction_8 (HappyAbsSyn5  happy_var_2)
 	_
 	 =  HappyAbsSyn6
-		 (PUnpack happy_var_2
+		 (EApply (ESymbol ",") happy_var_2
 	)
 happyReduction_8 _ _  = notHappyAtAll 
 
@@ -283,9 +287,9 @@ happyReduction_10 (HappyAbsSyn9  happy_var_1)
 happyReduction_10 _  = notHappyAtAll 
 
 happyReduce_11 = happySpecReduce_1  6 happyReduction_11
-happyReduction_11 (HappyTerminal (LSymbol happy_var_1))
+happyReduction_11 (HappyTerminal (TSymbol happy_var_1))
 	 =  HappyAbsSyn6
-		 (PSymbol happy_var_1
+		 (ESymbol happy_var_1
 	)
 happyReduction_11 _  = notHappyAtAll 
 
@@ -310,27 +314,27 @@ happyReduction_13 _ _ _  = notHappyAtAll
 happyReduce_14 = happySpecReduce_1  9 happyReduction_14
 happyReduction_14 _
 	 =  HappyAbsSyn9
-		 (PNothing
+		 (ENothing
 	)
 
 happyReduce_15 = happySpecReduce_1  9 happyReduction_15
-happyReduction_15 (HappyTerminal (LInteger happy_var_1))
+happyReduction_15 (HappyTerminal (TInteger happy_var_1))
 	 =  HappyAbsSyn9
-		 (PInteger happy_var_1
+		 (EInteger happy_var_1
 	)
 happyReduction_15 _  = notHappyAtAll 
 
 happyReduce_16 = happySpecReduce_1  9 happyReduction_16
-happyReduction_16 (HappyTerminal (LCharacter happy_var_1))
+happyReduction_16 (HappyTerminal (TCharacter happy_var_1))
 	 =  HappyAbsSyn9
-		 (PCharacter happy_var_1
+		 (ECharacter happy_var_1
 	)
 happyReduction_16 _  = notHappyAtAll 
 
 happyReduce_17 = happySpecReduce_1  9 happyReduction_17
-happyReduction_17 (HappyTerminal (LString happy_var_1))
+happyReduction_17 (HappyTerminal (TString happy_var_1))
 	 =  HappyAbsSyn9
-		 (PString happy_var_1
+		 (foldr (EPair . ECharacter) ENothing happy_var_1
 	)
 happyReduction_17 _  = notHappyAtAll 
 
@@ -345,7 +349,7 @@ happyReduce_19 = happySpecReduce_2  10 happyReduction_19
 happyReduction_19 (HappyAbsSyn5  happy_var_2)
 	(HappyAbsSyn10  happy_var_1)
 	 =  HappyAbsSyn10
-		 (PApply happy_var_1 happy_var_2
+		 (EApply happy_var_1 happy_var_2
 	)
 happyReduction_19 _ _  = notHappyAtAll 
 
@@ -360,7 +364,7 @@ happyReduce_21 = happySpecReduce_2  11 happyReduction_21
 happyReduction_21 (HappyAbsSyn6  happy_var_2)
 	(HappyAbsSyn11  happy_var_1)
 	 =  HappyAbsSyn11
-		 (PApply happy_var_1 happy_var_2
+		 (EApply happy_var_1 happy_var_2
 	)
 happyReduction_21 _ _  = notHappyAtAll 
 
@@ -370,16 +374,16 @@ happyNewToken action sts stk [] =
 happyNewToken action sts stk (tk:tks) =
 	let cont i = action i i tk (HappyState action) sts stk tks in
 	case tk of {
-	LComment -> cont 12;
-	LPack -> cont 13;
-	LUnpack -> cont 14;
-	LOpen -> cont 15;
-	LClose -> cont 16;
-	LSymbol happy_dollar_dollar -> cont 17;
-	LNothing -> cont 18;
-	LInteger happy_dollar_dollar -> cont 19;
-	LCharacter happy_dollar_dollar -> cont 20;
-	LString happy_dollar_dollar -> cont 21;
+	TComment -> cont 12;
+	TPack -> cont 13;
+	TUnpack -> cont 14;
+	TOpen -> cont 15;
+	TClose -> cont 16;
+	TSymbol happy_dollar_dollar -> cont 17;
+	TNothing -> cont 18;
+	TInteger happy_dollar_dollar -> cont 19;
+	TCharacter happy_dollar_dollar -> cont 20;
+	TString happy_dollar_dollar -> cont 21;
 	_ -> happyError' (tk:tks)
 	}
 
@@ -401,30 +405,46 @@ happyReturn = (return)
 happyThen1 m k tks = (>>=) m (\a -> k a tks)
 happyReturn1 :: () => a -> b -> HappyIdentity a
 happyReturn1 = \a tks -> (return) a
-happyError' :: () => [(Lexeme)] -> HappyIdentity a
-happyError' = HappyIdentity . happyError
+happyError' :: () => [(Token)] -> HappyIdentity a
+happyError' = HappyIdentity . eigenfail
 
-happyGatherParses tks = happyRunIdentity happySomeParser where
+eigenparse tks = happyRunIdentity happySomeParser where
   happySomeParser = happyThen (happyParse action_0 tks) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
 
 happySeq = happyDontSeq
 
 
-data Parse = PComment
-           | PPack Parse
-           | PUnpack Parse
-           | PApply Parse Parse
-           | PSymbol String
-           --
-           | PNothing
-           | PInteger Integer
-           | PCharacter Char
-           | PString String
-           deriving Show
+eigenfail :: [Token] -> a
+eigenfail (x : _) = error ("failed to parse: " ++ show x)
+eigenfail _ = error "failed to parse"
 
-happyError :: [Lexeme] -> a
-happyError (x : _) = error ("failed to parse: " ++ show x)
-happyError _ = error "failed to parse"
+eigenstrip :: Expression -> Expression
+eigenstrip (EApply EComment EComment) = ENothing
+eigenstrip (EApply EComment y) = y
+eigenstrip (EApply x EComment) = x
+eigenstrip (EApply x y) = EApply (eigenstrip x) (eigenstrip y)
+eigenstrip EComment = error "not an expression"
+eigenstrip x = x
+
+data Expression = EComment
+                | EApply Expression Expression
+                | ESymbol Name
+                --
+                | ENothing
+                | ELogical Bool
+                | EInteger Integer
+                | ECharacter Char
+                | EPair Expression Expression
+                -- These may be wrong.
+                | EFunction (Expression -> Expression) -- id
+                | EBind Environment Expression -- fromList []
+                | EArray (Array Int Expression) -- listArray (1, 0) []
+                deriving Show
+
+-- type Environment = Map Name Expression
+type Environment = [(Name, Expression)]
+
+type Name = String
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "<command-line>" #-}

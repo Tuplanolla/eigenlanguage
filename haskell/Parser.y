@@ -1,73 +1,93 @@
 {
 module Parser where
 
+import Data.Array (Array)
+import Data.Map (Map)
+import Text.Show.Functions ()
+
 import Lexer
 }
 
-%tokentype {Lexeme}
+%tokentype {Token}
 
-%token COMMENT   {LComment}
-       PACK      {LPack}
-       UNPACK    {LUnpack}
-       OPEN      {LOpen}
-       CLOSE     {LClose}
-       SYMBOL    {LSymbol $$}
+%token COMMENT   {TComment}
+       PACK      {TPack}
+       UNPACK    {TUnpack}
+       OPEN      {TOpen}
+       CLOSE     {TClose}
+       SYMBOL    {TSymbol $$}
        --
-       NOTHING   {LNothing}
-       INTEGER   {LInteger $$}
-       CHARACTER {LCharacter $$}
-       STRING    {LString $$}
+       NOTHING   {TNothing}
+       INTEGER   {TInteger $$}
+       CHARACTER {TCharacter $$}
+       STRING    {TString $$}
 
-%name happyGatherParses
+%name eigenparse program
 
-%error {happyError}
+%error {eigenfail}
 
 %%
 
-program :: {Parse}
+program :: {Expression}
         : pieces {$1}
 
-piece : COMMENT piece {PComment}
-      | PACK unpiece  {PPack $2}
+piece : COMMENT piece {EComment}
+      | PACK unpiece  {EApply (ESymbol "`") $2}
       | group         {$1}
       | value         {$1}
-      | SYMBOL        {PSymbol $1}
+      | SYMBOL        {ESymbol $1}
 
-unpiece : COMMENT unpiece {PComment}
-        | UNPACK piece    {PUnpack $2}
+unpiece : COMMENT unpiece {EComment}
+        | UNPACK piece    {EApply (ESymbol ",") $2}
         | ungroup         {$1}
         | value           {$1}
-        | SYMBOL          {PSymbol $1}
+        | SYMBOL          {ESymbol $1}
 
 group : OPEN pieces CLOSE {$2}
 
 ungroup : OPEN unpieces CLOSE {$2}
 
-value : NOTHING   {PNothing}
-      | INTEGER   {PInteger $1}
-      | CHARACTER {PCharacter $1}
-      | STRING    {PString $1}
+value : NOTHING   {ENothing}
+      | INTEGER   {EInteger $1}
+      | CHARACTER {ECharacter $1}
+      | STRING    {foldr (EPair . ECharacter) ENothing $1}
 
 pieces : piece        {$1}
-       | pieces piece {PApply $1 $2}
+       | pieces piece {EApply $1 $2}
 
 unpieces : unpiece          {$1}
-         | unpieces unpiece {PApply $1 $2}
+         | unpieces unpiece {EApply $1 $2}
 
 {
-data Parse = PComment
-           | PPack Parse
-           | PUnpack Parse
-           | PApply Parse Parse
-           | PSymbol String
-           --
-           | PNothing
-           | PInteger Integer
-           | PCharacter Char
-           | PString String
-           deriving Show
+eigenfail :: [Token] -> a
+eigenfail (x : _) = error ("failed to parse: " ++ show x)
+eigenfail _ = error "failed to parse"
 
-happyError :: [Lexeme] -> a
-happyError (x : _) = error ("failed to parse: " ++ show x)
-happyError _ = error "failed to parse"
+eigenstrip :: Expression -> Expression
+eigenstrip (EApply EComment EComment) = ENothing
+eigenstrip (EApply EComment y) = y
+eigenstrip (EApply x EComment) = x
+eigenstrip (EApply x y) = EApply (eigenstrip x) (eigenstrip y)
+eigenstrip EComment = error "not an expression"
+eigenstrip x = x
+
+data Expression = EComment
+                | EApply Expression Expression
+                | ESymbol Name
+                --
+                | ENothing
+                | ELogical Bool
+                | EInteger Integer
+                | ECharacter Char
+                | EPair Expression Expression
+                -- These may be wrong.
+                | EFunction (Expression -> Expression) -- id
+                | EBind Environment Expression -- fromList []
+                | EArray (Array Int Expression) -- listArray (1, 0) []
+                deriving Show
+
+-- type Environment = Map Name Expression
+type Environment = [(Name, Expression)]
+
+type Name = String
 }

@@ -2,22 +2,21 @@ module Formatter where
 
 import Parser
 
-formatWrapped :: Parse -> String
-formatWrapped = format True
+eigensubformat :: Expression -> String
+eigensubformat = format True
 
-formatUnwrapped :: Parse -> String
-formatUnwrapped = format False
+eigenformat :: Expression -> String
+eigenformat = format False
 
-format :: Bool -> Parse -> String
-format _ PComment = ""
-format _ (PPack x) = "`" ++ formatWrapped x
-format _ (PUnpack x) = "," ++ formatWrapped x
-format True p @ (PApply _ _) = "(" ++ formatUnwrapped p ++ ")"
-format _ (PApply f x) = let x @ (_ : _) +++ y @ (_ : _) = x ++ " " ++ y
-                            x +++ y = x ++ y in
-                            formatUnwrapped f +++ formatWrapped x
-format _ (PSymbol x) = x
-format _ PNothing = "()"
-format _ (PInteger x) = show x
-format _ (PCharacter x) = show x
-format _ (PString x) = show x
+-- This should use less packing and more line breaking.
+format :: Bool -> Expression -> String
+format _ (EApply (ESymbol "`") x) = "`" ++ eigensubformat x
+format _ (EApply (ESymbol ",") x) = "," ++ eigensubformat x
+format True p @ (EApply _ _) = "(" ++ eigenformat p ++ ")"
+format _ (EApply f x) = eigenformat f ++ " " ++ eigensubformat x
+format _ (ESymbol x) = x
+--
+format _ ENothing = "()"
+format _ (EInteger x) = show x
+format _ (ECharacter x) = show x
+format _ (EPair x y) = "`(," ++ eigenformat x ++ " ," ++ eigenformat y ++ ")"

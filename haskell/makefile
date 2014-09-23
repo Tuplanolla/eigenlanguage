@@ -9,10 +9,10 @@ clean: shallow-clean
 deep-clean: clean
 	$(RM) Lexer.hs Parser.hs
 
-Main: Main.hs Parser.hs
+Main: Analyzer.hs Evaluator.hs Formatter.hs Lexer.hs Main.hs Parser.hs Tester.hs
 	ghc Main.hs
 
-Parser.hs: Parser.y Lexer.hs
+Parser.hs: Lexer.hs Parser.y
 	happy Parser.y
 
 Lexer.hs: Lexer.x
