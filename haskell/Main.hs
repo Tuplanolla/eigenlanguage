@@ -21,7 +21,29 @@ main = do let f x @ (_ : _) = test x
           f x
 
 testExamples :: IO ()
-testExamples = sequence_ $ test <$> tests
+testExamples = sequence_ $ test <$> [
+ testNothingEasy,
+ testValueEasy,
+ testArithmeticEasy,
+ testBindingEasy,
+ -- testScopeEasy,
+ testFunctionEasy,
+ testRecursionEasy,
+ -- testDataEasy,
+ testLazinessEasy,
+ testTailEasy,
+ testCommentsEasy,
+ testNothingHard,
+ testValueHard,
+ testArithmeticHard,
+ -- testBindingHard,
+ -- testScopeHard,
+ -- testFunctionHard,
+ testRecursionHard,
+ -- testDataHard,
+ testLazinessHard,
+ testTailHard,
+ testCommentsHard]
 
 test :: String -> IO ()
 test s = do putChar '\n'
@@ -32,8 +54,8 @@ test s = do putChar '\n'
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
-            -- let x = eigenevaluate e
-            -- putStrLn ("Evaluated:\n" ++ show x)
+            let x = eigenevaluate e
+            putStrLn ("Evaluated:\n" ++ show x)
 
 showList :: Show a => [a] -> String
 showList x = "[" ++ intercalate ", " (map show x) ++ "]"

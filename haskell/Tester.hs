@@ -14,6 +14,7 @@ testsEasy = [testNothingEasy,
              testRecursionEasy,
              testDataEasy,
              testLazinessEasy,
+             testTailEasy,
              testCommentsEasy]
 
 testsHard :: [String]
@@ -26,6 +27,7 @@ testsHard = [testNothingHard,
              testRecursionHard,
              testDataHard,
              testLazinessHard,
+             testTailHard,
              testCommentsHard]
 
 testNothingEasy :: String
@@ -132,7 +134,7 @@ testDataEasy = "\
 
 testDataHard :: String
 testDataHard = "\
-\+ (evaluate (` (* 2 (, (always 3 4))))) 7\n\
+\+ (evaluate `(* 2 ,(always 3 4))) 7\n\
 \"
 
 testLazinessEasy :: String
@@ -147,6 +149,24 @@ testLazinessHard :: String
 testLazinessHard = "\
 \always 13 (= (f (-> x (f x)))\n\
 \             (f f))          \n\
+\"
+
+testTailEasy :: String
+testTailEasy = "\
+\= (f (-> n                 \n\
+\         (if (< n 1)       \n\
+\             13            \n\
+\             (f (- n 1)))))\n\
+\  (f 1024)                 \n\
+\"
+
+testTailHard :: String
+testTailHard = "\
+\= (f (-> n                 \n\
+\         (if (< n 1)       \n\
+\             13            \n\
+\             (f (- n 1)))))\n\
+\  (f 1048576)              \n\
 \"
 
 testCommentsEasy :: String

@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -w #-}
-module Parser (Expression, eigenparse) where
+module Parser (eigenparse) where
 
 import Common
 

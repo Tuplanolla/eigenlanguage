@@ -31,8 +31,8 @@ data Token = TComment
            | TString String
            deriving Show
 
--- type Environment = Map Name Expression
-type Environment = [(Name, Expression)]
+type Environment = Map Name Expression
+-- type Environment = [(Name, Expression)]
 
 type Name = String
 
