@@ -1,5 +1,7 @@
 {
-module Lexer where
+module Lexer (eigenlex) where
+
+import Common
 }
 
 %wrapper "basic"
@@ -14,7 +16,6 @@ lexemes :- $break+                            ;
            \,                                 {const TUnpack}
            \(                                 {const TOpen}
            \)                                 {const TClose}
-           \(\)                               {const TNothing}
            [\+\-]?[0-9]+(\^[0-9]+)?(_[0-9]+)? {TInteger . readInteger}
            -- TCyclotomic should be here and cover the complex field extension.
            '(\\.|[^\\'])+'                    {TCharacter . readCharacter}
@@ -22,28 +23,15 @@ lexemes :- $break+                            ;
            ~[\#`\,\(\)$break]+                {TSymbol}
 
 {
-readInteger :: String -> Integer
+readInteger :: Code -> Integer
 readInteger = read -- This is wrong.
 
-readCharacter :: String -> Char
+readCharacter :: Code -> Char
 readCharacter = head . tail -- This is wrong.
 
-readString :: String -> String
+readString :: Code -> String
 readString = init . tail -- This is wrong.
 
-eigenlex :: String -> [Token]
+eigenlex :: Code -> [Token]
 eigenlex = alexScanTokens
-
-data Token = TComment
-           | TPack
-           | TUnpack
-           | TOpen
-           | TClose
-           | TSymbol String
-           --
-           | TNothing
-           | TInteger Integer
-           | TCharacter Char
-           | TString String
-           deriving Show
 }

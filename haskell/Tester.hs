@@ -1,12 +1,12 @@
 module Tester where
 
-tests :: [String]
 tests = let interleave (x : xs) ys = x : interleave ys xs
             interleave _ ys = ys in
             interleave testsEasy testsHard
 
 testsEasy :: [String]
-testsEasy = [testValueEasy,
+testsEasy = [testNothingEasy,
+             testValueEasy,
              testArithmeticEasy,
              testBindingEasy,
              testScopeEasy,
@@ -17,7 +17,8 @@ testsEasy = [testValueEasy,
              testCommentsEasy]
 
 testsHard :: [String]
-testsHard = [testValueHard,
+testsHard = [testNothingHard,
+             testValueHard,
              testArithmeticHard,
              testBindingHard,
              testScopeHard,
@@ -26,6 +27,16 @@ testsHard = [testValueHard,
              testDataHard,
              testLazinessHard,
              testCommentsHard]
+
+testNothingEasy :: String
+testNothingEasy = "\
+\()\n\
+\"
+
+testNothingHard :: String
+testNothingHard = "\
+\\n\
+\"
 
 testValueEasy :: String
 testValueEasy = "\
@@ -70,19 +81,19 @@ testScopeEasy :: String
 testScopeEasy = "\
 \= (x 4)             \n\
 \  (- (+ 2           \n\
-\        (= y 3      \n\
+\        (= (y 3)    \n\
 \           (* y x)))\n\
 \     1)             \n\
 \"
 
 testScopeHard :: String
 testScopeHard = "\
-\= (x 2)             \n\
-\  (- (+ x           \n\
-\        (= x (- y 1)\n\
-\           y 4      \n\
-\           (* x y)))\n\
-\     1)             \n\
+\= (x 2)              \n\
+\  (- (+ x            \n\
+\        (= (x (- y 1)\n\
+\            y 4)     \n\
+\           (* x y))) \n\
+\     1)              \n\
 \"
 
 testFunctionEasy :: String
@@ -147,8 +158,8 @@ testCommentsEasy = "\
 
 testCommentsHard :: String
 testCommentsHard = "\
-\- (* (+ 2 #(nested #comment # with        \n\
+\- (* (+ 2 #(nested #comments # with       \n\
 \            #`more `#than one #(#line)) 3)\n\
-\     (+ 4 5 #!))                          \n\
+\     (#! + 4 5 #!))                       \n\
 \  32                                      \n\
 \"

@@ -7,6 +7,7 @@ import Data.Functor
 import Data.Map (Map)
 import Text.Show.Functions ()
 
+import Common
 import Parser
 
 eigenevaluate :: Expression -> Expression

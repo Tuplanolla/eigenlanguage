@@ -5,6 +5,7 @@ import Data.Functor
 import Data.List (intercalate)
 import System.Environment
 
+import Common
 import Evaluator
 import Formatter
 import Lexer
@@ -27,7 +28,7 @@ test s = do putChar '\n'
             putStr ("Read:\n" ++ s)
             let t = eigenlex s
             putStrLn ("Tokenized:\n" ++ showList t)
-            let e = eigenstrip (eigenparse t)
+            let e = eigenparse t
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)

@@ -1,6 +1,6 @@
-module Formatter where
+module Formatter (eigenformat) where
 
-import Parser
+import Common
 
 eigensubformat :: Expression -> String
 eigensubformat = format True
