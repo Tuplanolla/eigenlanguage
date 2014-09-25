@@ -27,13 +27,13 @@ program :: {Expression}
         : something {$1}
 
 piece : COMMENT piece {EComment}
-      | PACK unpiece  {EApply (ESymbol "`") $2}
+      | PACK unpiece  {EPair (ESymbol "`") $2}
       | group         {$1}
       | value         {$1}
       | SYMBOL        {ESymbol $1}
 
 unpiece : COMMENT unpiece {EComment}
-        | UNPACK piece    {EApply (ESymbol ",") $2}
+        | UNPACK piece    {EPair (ESymbol ",") $2}
         | ungroup         {$1}
         | value           {$1}
         | SYMBOL          {ESymbol $1}
@@ -49,14 +49,14 @@ unsomething : {- NOTHING -} {ENothing}
             | unpieces      {$1}
 
 pieces : piece        {$1}
-       | pieces piece {EApply $1 $2}
+       | pieces piece {EPair $1 $2}
 
 unpieces : unpiece          {$1}
-         | unpieces unpiece {EApply $1 $2}
+         | unpieces unpiece {EPair $1 $2}
 
 value : INTEGER   {EInteger $1}
       | CHARACTER {ECharacter $1}
-      | STRING    {foldr (EPair . ECharacter) ENothing $1}
+      | STRING    {EPair (ESymbol "`") (foldr (EPair . ECharacter) ENothing $1)}
 
 {
 eigenfail :: [Token] -> a
@@ -67,10 +67,10 @@ eigenparse :: [Token] -> Expression
 eigenparse = eigenstrip . eigensemiparse
 
 eigenstrip :: Expression -> Expression
-eigenstrip (EApply EComment EComment) = ENothing
-eigenstrip (EApply EComment y) = eigenstrip y
-eigenstrip (EApply x EComment) = eigenstrip x
-eigenstrip (EApply x y) = EApply (eigenstrip x) (eigenstrip y)
+eigenstrip (EPair EComment EComment) = ENothing
+eigenstrip (EPair EComment y) = eigenstrip y
+eigenstrip (EPair x EComment) = eigenstrip x
+eigenstrip (EPair x y) = EPair (eigenstrip x) (eigenstrip y)
 eigenstrip EComment = error "not an expression"
 eigenstrip x = x
 }

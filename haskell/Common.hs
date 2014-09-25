@@ -5,14 +5,13 @@ import Data.Map (Map)
 import Text.Show.Functions ()
 
 data Expression = EComment
-                | EApply Expression Expression
+                | EPair Expression Expression
                 | ESymbol Name
                 --
                 | ENothing
                 | ELogical Bool
                 | EInteger Integer
                 | ECharacter Char
-                | EPair Expression Expression
                 -- These may be wrong.
                 | EFunction (Expression -> Expression) -- id
                 | EBind Environment Expression -- fromList []

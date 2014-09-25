@@ -1,6 +1,5 @@
 module Main where
 
-import Prelude hiding (showList)
 import Data.Functor
 import Data.List (intercalate)
 import System.Environment
@@ -16,7 +15,7 @@ main :: IO ()
 main = do let f x @ (_ : _) = test x
               f _ = do putStrLn "Have an example then."
                        testExamples
-          putStrLn "Write code?"
+          putStrLn "Write code and hit done (Enter to flush and Ctrl D to stop), show examples (Ctrl D right now) or cancel (Ctrl C anywhere)."
           x <- getContents
           f x
 
@@ -40,16 +39,16 @@ testExamples = sequence_ $ test <$> [
  testScopeHard,
  testFunctionHard,
  testRecursionHard,
- -- testDataHard,
+ testDataHard,
  testLazinessHard,
- -- testTailHard,
+ -- testTailHard, -- This is slow.
  testCommentsHard]
 
 test :: String -> IO ()
 test s = do putChar '\n'
             putStr ("Read:\n" ++ s)
             let t = eigenlex s
-            putStrLn ("Tokenized:\n" ++ showList t)
+            putStrLn ("Tokenized:\n" ++ showWithSpaces t)
             let e = eigenparse t
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
@@ -57,8 +56,8 @@ test s = do putChar '\n'
             let x = eigenevaluate e
             putStrLn ("Evaluated:\n" ++ show x)
 
-showList :: Show a => [a] -> String
-showList x = "[" ++ intercalate ", " (map show x) ++ "]"
+showWithSpaces :: Show a => [a] -> String
+showWithSpaces = intercalate " " . map (("(" ++) . (++ ")") . show)
 
 loop :: IO ()
-loop = undefined
+loop = undefined -- User experience goes here.

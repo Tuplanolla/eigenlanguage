@@ -215,7 +215,7 @@ happyReduce_3 = happySpecReduce_2  5 happyReduction_3
 happyReduction_3 (HappyAbsSyn6  happy_var_2)
 	_
 	 =  HappyAbsSyn5
-		 (EApply (ESymbol "`") happy_var_2
+		 (EPair (ESymbol "`") happy_var_2
 	)
 happyReduction_3 _ _  = notHappyAtAll 
 
@@ -251,7 +251,7 @@ happyReduce_8 = happySpecReduce_2  6 happyReduction_8
 happyReduction_8 (HappyAbsSyn5  happy_var_2)
 	_
 	 =  HappyAbsSyn6
-		 (EApply (ESymbol ",") happy_var_2
+		 (EPair (ESymbol ",") happy_var_2
 	)
 happyReduction_8 _ _  = notHappyAtAll 
 
@@ -329,7 +329,7 @@ happyReduce_19 = happySpecReduce_2  11 happyReduction_19
 happyReduction_19 (HappyAbsSyn5  happy_var_2)
 	(HappyAbsSyn11  happy_var_1)
 	 =  HappyAbsSyn11
-		 (EApply happy_var_1 happy_var_2
+		 (EPair happy_var_1 happy_var_2
 	)
 happyReduction_19 _ _  = notHappyAtAll 
 
@@ -344,7 +344,7 @@ happyReduce_21 = happySpecReduce_2  12 happyReduction_21
 happyReduction_21 (HappyAbsSyn6  happy_var_2)
 	(HappyAbsSyn12  happy_var_1)
 	 =  HappyAbsSyn12
-		 (EApply happy_var_1 happy_var_2
+		 (EPair happy_var_1 happy_var_2
 	)
 happyReduction_21 _ _  = notHappyAtAll 
 
@@ -365,7 +365,7 @@ happyReduction_23 _  = notHappyAtAll
 happyReduce_24 = happySpecReduce_1  13 happyReduction_24
 happyReduction_24 (HappyTerminal (TString happy_var_1))
 	 =  HappyAbsSyn13
-		 (foldr (EPair . ECharacter) ENothing happy_var_1
+		 (EPair (ESymbol "`") (foldr (EPair . ECharacter) ENothing happy_var_1)
 	)
 happyReduction_24 _  = notHappyAtAll 
 
@@ -422,10 +422,10 @@ eigenparse :: [Token] -> Expression
 eigenparse = eigenstrip . eigensemiparse
 
 eigenstrip :: Expression -> Expression
-eigenstrip (EApply EComment EComment) = ENothing
-eigenstrip (EApply EComment y) = eigenstrip y
-eigenstrip (EApply x EComment) = eigenstrip x
-eigenstrip (EApply x y) = EApply (eigenstrip x) (eigenstrip y)
+eigenstrip (EPair EComment EComment) = ENothing
+eigenstrip (EPair EComment y) = eigenstrip y
+eigenstrip (EPair x EComment) = eigenstrip x
+eigenstrip (EPair x y) = EPair (eigenstrip x) (eigenstrip y)
 eigenstrip EComment = error "not an expression"
 eigenstrip x = x
 {-# LINE 1 "templates/GenericTemplate.hs" #-}

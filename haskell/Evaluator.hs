@@ -1,12 +1,9 @@
-module Evaluator where
+module Evaluator where -- This is bad.
 
 import Control.Applicative
-import Control.Monad
-import Data.Array (Array)
 import Data.Functor
 import Data.Map (Map, fromList, lookup, mapWithKey, union)
 import Prelude hiding (lookup)
-import Text.Show.Functions ()
 
 import Common
 import Parser
@@ -16,28 +13,30 @@ eigenevaluate = evaluate systemEnv
 
 evaluate :: Environment -> Expression -> Expression
 evaluate b (EFunction f) = EFunction (evaluate b . f)
-evaluate b (EApply (ESymbol "`") x) = unevaluate b x
-evaluate b (EApply (ESymbol ",") x) = error "nope"
-evaluate b (EApply (EApply (ESymbol "->") (ESymbol x)) y) =
- EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
-evaluate b (EApply (EApply (ESymbol "->") (EApply (ESymbol x) q)) y) =
- EFunction $ \ z -> evaluate b (EApply (EApply (ESymbol "->") q)
-                                       (EBind (fromList [(x, z)]) y))
-evaluate b (EApply (EApply (ESymbol "=") xs) y) =
- evaluate b (EBind (fromList (listidate xs)) y)
--- Long form goes here.
-evaluate b (EApply f x) = apply (evaluate b f) (evaluate b x)
+evaluate b (EPair (ESymbol "`") x) = unevaluate b x
+evaluate b (EPair (ESymbol ",") x) = error "already unpacked" {- This should
+never happen (assuming the parser works correctly). -}
+evaluate b (EPair (EPair (ESymbol "->") (ESymbol x)) y)
+ = EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
+evaluate b (EPair (EPair (ESymbol "->") (EPair (ESymbol x) q)) y)
+ = EFunction $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
+                                      (EBind (fromList [(x, z)]) y))
+evaluate b (EPair (EPair (ESymbol "=") xs) y)
+ = evaluate b (EBind (fromList (listidate xs)) y)
+evaluate b (EPair f x) = apply (evaluate b f) (evaluate b x)
 evaluate b (EBind e x) = let bind y z = evaluate b (EBind e z) in
                              evaluate ((bind `mapWithKey` e) `union` b) x
 evaluate b (ESymbol k) = fetch k b (lookup k b)
-evaluate b e = e
+evaluate b x = x
 
 unevaluate :: Environment -> Expression -> Expression
-unevaluate = const id
+unevaluate b (EPair (ESymbol ",") x) = evaluate b x
+unevaluate b (EPair f x) = EPair (unevaluate b f) (unevaluate b x)
+unevaluate b x = x
 
 listidate :: Expression -> [(Name, Expression)]
-listidate (EApply (EApply x (ESymbol z)) y) = (z, y) : listidate x
-listidate (EApply (ESymbol x) y) = [(x, y)]
+listidate (EPair (EPair x (ESymbol z)) y) = (z, y) : listidate x
+listidate (EPair (ESymbol x) y) = [(x, y)]
 
 apply :: Expression -> Expression -> Expression
 apply (EFunction f) x = f x
@@ -60,6 +59,18 @@ systemEnv = fromList [("-", liftInteger2 (-)),
                       ("<", liftIntegerPredicate (<)),
                       ("evaluate", liftEvaluate)
                       ]
+
+liftIf :: Expression
+liftIf = let run = getLogical . evaluate (fromList empty) in
+             EFunction (\ x -> EFunction (\ y -> EFunction (\ z -> if run x then y else z)))
+
+liftAlways :: Expression
+liftAlways = EFunction (\ x -> EFunction (\ y -> x))
+
+liftEvaluate :: Expression
+liftEvaluate = EFunction eigenevaluate
+
+-- The rest is automatically generated.
 
 getInteger :: Expression -> Integer
 getInteger (EInteger x) = x
@@ -84,13 +95,3 @@ liftInteger3 f = let run = getInteger . evaluate (fromList empty) in
 liftIntegerPredicate :: (Integer -> Integer -> Bool) -> Expression
 liftIntegerPredicate f = let run = getInteger . evaluate (fromList empty) in
                              EFunction (\ x -> EFunction (\ y -> ELogical (f (run x) (run y))))
-
-liftAlways :: Expression
-liftAlways = EFunction (\ x -> EFunction (\ y -> x))
-
-liftIf :: Expression
-liftIf = let run = getLogical . evaluate (fromList empty) in
-             EFunction (\ x -> EFunction (\ y -> EFunction (\ z -> if run x then y else z)))
-
-liftEvaluate :: Expression
-liftEvaluate = EFunction eigenevaluate
