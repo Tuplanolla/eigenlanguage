@@ -16,18 +16,28 @@ eigenevaluate = evaluate systemEnv
 
 evaluate :: Environment -> Expression -> Expression
 evaluate b (EFunction f) = EFunction (evaluate b . f)
-evaluate b (EApply (EApply (ESymbol "->") (ESymbol x)) y) = EFunction $
- \ z -> evaluate b (EBind (fromList [(x, z)]) y)
--- Long form goes here.
-evaluate b (EApply (EApply (ESymbol "=") (EApply (ESymbol x) w)) y) = id $
- evaluate b (EBind (fromList [(x, w)]) y)
+evaluate b (EApply (ESymbol "`") x) = unevaluate b x
+evaluate b (EApply (ESymbol ",") x) = error "nope"
+evaluate b (EApply (EApply (ESymbol "->") (ESymbol x)) y) =
+ EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
+evaluate b (EApply (EApply (ESymbol "->") (EApply (ESymbol x) q)) y) =
+ EFunction $ \ z -> evaluate b (EApply (EApply (ESymbol "->") q)
+                                       (EBind (fromList [(x, z)]) y))
+evaluate b (EApply (EApply (ESymbol "=") xs) y) =
+ evaluate b (EBind (fromList (listidate xs)) y)
 -- Long form goes here.
 evaluate b (EApply f x) = apply (evaluate b f) (evaluate b x)
 evaluate b (EBind e x) = let bind y z = evaluate b (EBind e z) in
                              evaluate ((bind `mapWithKey` e) `union` b) x
--- evaluate b (EBind e x) = evaluate (e ++ b) x
 evaluate b (ESymbol k) = fetch k b (lookup k b)
 evaluate b e = e
+
+unevaluate :: Environment -> Expression -> Expression
+unevaluate = const id
+
+listidate :: Expression -> [(Name, Expression)]
+listidate (EApply (EApply x (ESymbol z)) y) = (z, y) : listidate x
+listidate (EApply (ESymbol x) y) = [(x, y)]
 
 apply :: Expression -> Expression -> Expression
 apply (EFunction f) x = f x
@@ -47,8 +57,8 @@ systemEnv = fromList [("-", liftInteger2 (-)),
                       ("false", ELogical False),
                       ("always", liftAlways),
                       ("if", liftIf),
-                      ("<", liftIntegerPredicate (<))
-                      -- , ("evaluate", liftInteger2 (evaluate))
+                      ("<", liftIntegerPredicate (<)),
+                      ("evaluate", liftEvaluate)
                       ]
 
 getInteger :: Expression -> Integer
@@ -81,3 +91,6 @@ liftAlways = EFunction (\ x -> EFunction (\ y -> x))
 liftIf :: Expression
 liftIf = let run = getLogical . evaluate (fromList empty) in
              EFunction (\ x -> EFunction (\ y -> EFunction (\ z -> if run x then y else z)))
+
+liftEvaluate :: Expression
+liftEvaluate = EFunction eigenevaluate

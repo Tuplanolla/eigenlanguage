@@ -90,12 +90,13 @@ testScopeEasy = "\
 
 testScopeHard :: String
 testScopeHard = "\
-\= (x 2)              \n\
-\  (- (+ x            \n\
-\        (= (x (- y 1)\n\
-\            y 4)     \n\
-\           (* x y))) \n\
-\     1)              \n\
+\= (x 2)               \n\
+\  (- (+ x             \n\
+\        (= (x (+ y 3) \n\
+\            y 4       \n\
+\            z (- x 5))\n\
+\           (* x z)))  \n\
+\     3)               \n\
 \"
 
 testFunctionEasy :: String
