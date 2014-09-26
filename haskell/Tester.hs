@@ -1,97 +1,69 @@
-module Tester where
+module Tester (Test, tests) where
 
-tests = let interleave (x : xs) ys = x : interleave ys xs
-            interleave _ ys = ys in
-            interleave testsEasy testsHard
+import Common (Code, Name)
 
-testsEasy :: [String]
-testsEasy = [testNothingEasy,
-             testValueEasy,
-             testArithmeticEasy,
-             testBindingEasy,
-             testScopeEasy,
-             testFunctionEasy,
-             testRecursionEasy,
-             testDataEasy,
-             testLazinessEasy,
-             testTailEasy,
-             testOutputEasy,
-             testCommentsEasy]
-
-testsHard :: [String]
-testsHard = [testNothingHard,
-             testValueHard,
-             testArithmeticHard,
-             testBindingHard,
-             testScopeHard,
-             testFunctionHard,
-             testRecursionHard,
-             testDataHard,
-             testLazinessHard,
-             testTailHard,
-             testOutputHard,
-             testCommentsHard]
-
-testNothingEasy :: String
-testNothingEasy = "\
+tests :: [Test]
+tests = [Test {name = "Nothing"
+               difficulty = Easy,
+               code = "\
 \()\n\
-\"
-
-testNothingHard :: String
-testNothingHard = "\
+\"},
+         Test {name = "Nothing"
+               difficulty = Hard,
+               code = "\
 \\n\
-\"
-
-testValueEasy :: String
-testValueEasy = "\
+\"},
+         Test {name = "Value"
+               difficulty = Easy,
+               code = "\
 \13\n\
-\"
-
-testValueHard :: String
-testValueHard = "\
+\"},
+         Test {name = "Value"
+               difficulty = Hard,
+               code = "\
 \always (always 13) \"two\" '3'\n\
-\"
-
-testArithmeticEasy :: String
-testArithmeticEasy = "\
+\"},
+         Test {name = "Arithmetic"
+               difficulty = Easy,
+               code = "\
 \- (* (+ 2 3) \n\
 \     (+ 4 5))\n\
 \  32         \n\
-\"
-
-testArithmeticHard :: String
-testArithmeticHard = "\
+\"},
+         Test {name = "Arithmetic"
+               difficulty = Hard,
+               code = "\
 \( ((-) ((((*) ((+) (2) (3)))\n\
 \           (((+) 4) 5)))    \n\
 \    (32)) )                 \n\
-\"
-
-testBindingEasy :: String
-testBindingEasy = "\
+\"},
+         Test {name = "Binding"
+               difficulty = Easy,
+               code = "\
 \- (+ 2 (= (x 3)    \n\
 \          (* x 4)))\n\
 \  1                \n\
-\"
-
-testBindingHard :: String
-testBindingHard = "\
+\"},
+         Test {name = "Binding"
+               difficulty = Hard,
+               code = "\
 \- (+ 2 (= (x 3     \n\
 \           y 4)    \n\
 \          (* x y)))\n\
 \  1                \n\
-\"
-
-testScopeEasy :: String
-testScopeEasy = "\
+\"},
+         Test {name = "Scope"
+               difficulty = Easy,
+               code = "\
 \= (x 4)             \n\
 \  (- (+ 2           \n\
 \        (= (y 3)    \n\
 \           (* y x)))\n\
 \     1)             \n\
-\"
-
-testScopeHard :: String
-testScopeHard = "\
+\"},
+         Test {name = "Scope"
+               difficulty = Hard,
+               code = "\
 \= (x 2)               \n\
 \  (- (+ x             \n\
 \        (= (x (+ y 3) \n\
@@ -99,100 +71,106 @@ testScopeHard = "\
 \            z (- x 5))\n\
 \           (* x z)))  \n\
 \     3)               \n\
-\"
-
-testFunctionEasy :: String
-testFunctionEasy = "\
+\"},
+         Test {name = "Function"
+               difficulty = Easy,
+               code = "\
 \(-> x (+ 2 x)) 11\n\
-\"
-
-testFunctionHard :: String
-testFunctionHard = "\
+\"},
+         Test {name = "Function"
+               difficulty = Hard,
+               code = "\
 \-> (x y) (+ x y) (-> x 2 3) 11\n\
-\"
-
-testRecursionEasy :: String
-testRecursionEasy = "\
+\"},
+         Test {name = "Recursion"
+               difficulty = Easy,
+               code = "\
 \= (f (-> n                       \n\
 \         (if (< n 2)             \n\
 \             n                   \n\
 \             (* n (f (- n 1))))))\n\
 \  (- (f 4) 11)                   \n\
-\"
-
-testRecursionHard :: String
-testRecursionHard = "\
+\"},
+         Test {name = "Recursion"
+               difficulty = Hard,
+               code = "\
 \= (f (-> n                     \n\
 \         (if (< n 2)           \n\
 \             n                 \n\
 \             (+ (f (- n 1))    \n\
 \                (f (- n 2))))))\n\
 \  (f 7)                        \n\
-\"
-
-testDataEasy :: String
-testDataEasy = "\
+\"},
+         Test {name = "Data"
+               difficulty = Easy,
+               code = "\
 \+ (evaluate (` (* 2 3))) 7\n\
-\"
-
-testDataHard :: String
-testDataHard = "\
+\"},
+         Test {name = "Data"
+               difficulty = Hard,
+               code = "\
 \+ (evaluate `(* 2 ,(always 3 4))) 7\n\
-\"
-
-testLazinessEasy :: String
-testLazinessEasy = "\
+\"},
+         Test {name = "Laziness"
+               difficulty = Easy,
+               code = "\
 \if (< 2 3)            \n\
 \   13                 \n\
 \   (= (f (-> x (f x)))\n\
 \      (f f))          \n\
-\"
-
-testLazinessHard :: String
-testLazinessHard = "\
+\"},
+         Test {name = "Laziness"
+               difficulty = Hard,
+               code = "\
 \always 13 (= (f (-> x (f x)))\n\
 \             (f f))          \n\
-\"
-
-testTailEasy :: String
-testTailEasy = "\
+\"},
+         Test {name = "Tail"
+               difficulty = Easy,
+               code = "\
 \= (f (-> n                 \n\
 \         (if (< n 1)       \n\
 \             13            \n\
 \             (f (- n 1)))))\n\
 \  (f 1024)                 \n\
-\"
-
-testTailHard :: String
-testTailHard = "\
+\"},
+         Test {name = "Tail"
+               difficulty = Hard,
+               code = "\
 \= (f (-> n                 \n\
 \         (if (< n 1)       \n\
 \             13            \n\
 \             (f (- n 1)))))\n\
 \  (f 1048576)              \n\
-\"
-
-testOutputEasy :: String
-testOutputEasy = "\
+\"},
+         Test {name = "Output"
+               difficulty = Easy,
+               code = "\
 \print-character '!' io\n\
-\"
-
-testOutputHard :: String
-testOutputHard = "\
+\"},
+         Test {name = "Output"
+               difficulty = Hard,
+               code = "\
 \print-character '!' (print-character '?' io)\n\
-\"
-
-testCommentsEasy :: String
-testCommentsEasy = "\
+\"},
+         Test {name = "Comments"
+               difficulty = Easy,
+               code = "\
 \- (* (+ 2 #comment 3)  \n\
 \     (+ 4 5)) # comment\n\
 \  32                   \n\
-\"
-
-testCommentsHard :: String
-testCommentsHard = "\
+\"},
+         Test {name = "Comments"
+               difficulty = Hard,
+               code = "\
 \- (* (+ 2 #(nested #comments # with       \n\
 \            #`more `#than one #(#line)) 3)\n\
 \     (#! + 4 5 #!))                       \n\
 \  32                                      \n\
-\"
+\"}]
+
+data Test = {name :: Name,
+                     difficulty :: Difficulty,
+                     code :: Code}
+
+data Difficulty = Easy | Hard

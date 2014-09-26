@@ -3,6 +3,7 @@ module Evaluator where -- This is bad.
 import Control.Applicative
 import Control.Monad hiding (sequence)
 import Data.Functor
+import Data.IORef
 import Data.Map (Map, fromList, lookup, mapWithKey, union)
 import Data.Traversable
 import Prelude hiding (lookup, sequence)
@@ -17,20 +18,17 @@ eigenevaluate x = do e <- systemEnv
 evaluate :: Environment -> Expression -> IO Expression
 evaluate b (EProcedure f) = return $ EProcedure (\ x -> evaluate b =<< f x)
 evaluate b (EPair (ESymbol "`") x) = unevaluate b x
-evaluate b (EPair (ESymbol ",") x) = error "already unpacked" {- This should
-never happen (assuming the parser works correctly). -}
-evaluate b (EPair (EPair (ESymbol "->") (ESymbol x)) y)
- = return $ EProcedure $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
-evaluate b (EPair (EPair (ESymbol "->") (EPair (ESymbol x) q)) y)
- = return $ EProcedure $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
-                                                  (EBind (fromList [(x, z)]) y))
-evaluate b (EPair (EPair (ESymbol "=") xs) y)
- = evaluate b (EBind (fromList (listidate xs)) y)
+evaluate b (EPair (EPair (ESymbol "->")
+                         (ESymbol x)) y) = return $ EProcedure $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
+evaluate b (EPair (EPair (ESymbol "->")
+                         (EPair (ESymbol x) q)) y) = return $ EProcedure $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
+                                                      (EBind (fromList [(x, z)]) y))
+evaluate b (EPair (EPair (ESymbol "=") xs) y) = evaluate b (EBind (fromList (listidate xs)) y)
 evaluate b (EPair f x) = do p <- evaluate b f
                             q <- evaluate b x
-                            apply p q
+                            apply p q -- Both branches of if are evaluated here.
 evaluate b (EBind e x) = evaluate (union e b) x
-evaluate b (ESymbol k) = evaluate b (fetch k b (lookup k b)) -- This is eager.
+evaluate b (ESymbol k) = return $ fetch k b (lookup k b)
 evaluate b x = return x
 
 apply :: Expression -> Expression -> IO Expression
@@ -49,9 +47,6 @@ listidate (EPair (ESymbol x) y) = [(x, y)]
 fetch k b (Just v) = v
 fetch k b _ = error ("not a name: " ++ k)
 
-assoc :: Eq k => k -> v -> [(k, v)] -> [(k, v)]
-assoc k v xs = (k, v) : filter ((k /=) . fst) xs
-
 systemEnv :: IO Environment
 systemEnv = sequence $ fromList
  [("-", liftInteger2 (-)),
@@ -63,7 +58,17 @@ systemEnv = sequence $ fromList
   ("if", liftIf),
   ("<", liftIntegerPredicate (<)),
   ("evaluate", liftEvaluate),
+  ("io", EUnique <$> newIORef True),
   ("print-character", liftPrintChar putChar)]
+
+touch :: IO () -> Expression -> IO Expression
+touch a (EUnique r) = do x <- readIORef r
+                         if x then
+                              do writeIORef r False
+                                 _ <- a
+                                 r <- newIORef True
+                                 return (EUnique r) else
+                              error "not a valid reference"
 
 liftPrintChar :: (Char -> IO ()) -> IO Expression
 liftPrintChar f = let run = (getCharacter <$>) . evaluate (fromList empty) in

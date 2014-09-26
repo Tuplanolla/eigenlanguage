@@ -1,7 +1,7 @@
 {
 module Lexer (eigenlex) where
 
-import Common
+import Common (Code, Token (..))
 }
 
 %wrapper "basic"

@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -w #-}
 module Parser (eigenparse) where
 
-import Common
+import Common (Expression (..), Token (..))
 
 -- parser produced by Happy Version 1.19.0
 

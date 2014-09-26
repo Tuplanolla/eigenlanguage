@@ -1,7 +1,7 @@
 {
 module Parser (eigenparse) where
 
-import Common
+import Common (Expression (..), Token (..))
 }
 
 %tokentype {Token}

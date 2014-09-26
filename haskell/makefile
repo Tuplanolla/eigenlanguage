@@ -12,7 +12,7 @@ deep-clean: clean
 run: Main
 	command -v rlwrap > /dev/null && rlwrap ./Main || ./Main
 
-Main: Common.hs Evaluator.hs Formatter.hs Interpreter.hs Lexer.hs Main.hs Parser.hs Tester.hs
+Main: Common.hs Evaluator.hs Formatter.hs Hack.hs Interpreter.hs Lexer.hs Main.hs Parser.hs Tester.hs
 	ghc Main.hs
 
 Parser.hs: Common.hs Lexer.hs Parser.y
