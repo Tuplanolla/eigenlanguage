@@ -9,7 +9,10 @@ clean: shallow-clean
 deep-clean: clean
 	$(RM) Lexer.hs Parser.hs
 
-Main: Common.hs Evaluator.hs Formatter.hs Lexer.hs Main.hs Parser.hs Tester.hs
+run: Main
+	command -v rlwrap && rlwrap ./Main || ./Main
+
+Main: Common.hs Evaluator.hs Formatter.hs Interpreter.hs Lexer.hs Main.hs Parser.hs Tester.hs
 	ghc Main.hs
 
 Parser.hs: Common.hs Lexer.hs Parser.y

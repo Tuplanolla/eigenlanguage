@@ -7,12 +7,14 @@ import System.Environment
 import Common
 import Evaluator
 import Formatter
+import Interpreter
 import Lexer
 import Parser
 import Tester
 
 main :: IO ()
-main = do let f x @ (_ : _) = test x
+main = loop
+gain = do let f x @ (_ : _) = test x
               f _ = do putStrLn "Have an example then."
                        testExamples
           putStrLn "Write code and hit done (Enter to flush and Ctrl D to stop), show examples (Ctrl D right now) or cancel (Ctrl C anywhere)."
@@ -58,6 +60,3 @@ test s = do putChar '\n'
 
 showWithSpaces :: Show a => [a] -> String
 showWithSpaces = intercalate " " . map (("(" ++) . (++ ")") . show)
-
-loop :: IO ()
-loop = undefined -- User experience goes here.

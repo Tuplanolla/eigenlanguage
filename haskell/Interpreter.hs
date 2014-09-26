@@ -1,0 +1,44 @@
+module Interpreter (loop) where
+
+import Common
+import Evaluator
+import Formatter
+import Lexer
+import Parser
+import Tester
+
+import Control.Exception
+import Data.Functor
+import System.IO
+
+loop :: IO ()
+loop = loopWith (0, []) -- User experience goes here.
+
+loopWith :: (Int, [Token]) -> IO ()
+loopWith (d, t) = do if d > 0 then
+                        putStr "#... " else
+                        putStr "#|E> "
+                     flush
+                     e <- isEOF
+                     if e then
+                        putStrLn "" else
+                        do ts <- eigenlex <$> getLine
+                           let ds = d + depth ts
+                           if ds > 0 then -- It's called a bird's nest.
+                              loopWith (ds, t ++ ts) else
+                              do e <- return . eigenevaluate . eigenparse $ t ++ ts
+                                 putStrLn . eigenformat $ e
+                                 loopWith (0, []) `catch` -- It's good.
+                                  \ e -> do putStrLn . show $ (e :: SomeException)
+                                            loopWith (0, [])
+
+depth :: [Token] -> Int
+depth = sum . (change <$>)
+
+change :: Token -> Int
+change TOpen = 1
+change TClose = -1
+change _ = 0
+
+flush :: IO ()
+flush = hFlush stdout

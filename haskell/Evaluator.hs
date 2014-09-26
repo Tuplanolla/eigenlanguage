@@ -43,7 +43,7 @@ apply (EFunction f) x = f x
 apply f _ = error ("not a function: " ++ show f)
 
 fetch k b (Just v) = v
-fetch k b _ = error ("not a name: " ++ k ++ "\nin: " ++ show b)
+fetch k b _ = error ("not a name: " ++ k)
 
 assoc :: Eq k => k -> v -> [(k, v)] -> [(k, v)]
 assoc k v xs = (k, v) : filter ((k /=) . fst) xs

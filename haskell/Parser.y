@@ -71,6 +71,6 @@ eigenstrip (EPair EComment EComment) = ENothing
 eigenstrip (EPair EComment y) = eigenstrip y
 eigenstrip (EPair x EComment) = eigenstrip x
 eigenstrip (EPair x y) = EPair (eigenstrip x) (eigenstrip y)
-eigenstrip EComment = error "not an expression"
+eigenstrip EComment = ENothing
 eigenstrip x = x
 }
