@@ -29,28 +29,22 @@ evaluate b (EPair (EPair (ESymbol "=") xs) y)
 evaluate b (EPair f x) = do p <- evaluate b f
                             q <- evaluate b x
                             apply p q
--- evaluate b (EBind e x) = evaluate (union e b) x -- Finite binding (wrong).
--- evaluate b (EBind e x) = do q <- sequence $ bind b e <$> e
---                             evaluate (union q b) x -- Infinite binding (also wrong).
-evaluate b (EBind e x) = undefined -- Indefinite binding.
-evaluate b (ESymbol k) = return $ fetch k b (lookup k b)
+evaluate b (EBind e x) = evaluate (union e b) x
+evaluate b (ESymbol k) = evaluate b (fetch k b (lookup k b)) -- This is eager.
 evaluate b x = return x
 
-bind :: Environment -> Environment -> Expression -> IO Expression
-bind b e z = evaluate b (EBind e z)
+apply :: Expression -> Expression -> IO Expression
+apply (EProcedure f) x = f x
+apply f _ = error ("not a function: " ++ show f)
 
 unevaluate :: Environment -> Expression -> IO Expression
 unevaluate b (EPair (ESymbol ",") x) = evaluate b x
-unevaluate b (EPair f x) = EPair <$> (unevaluate b f) <*> (unevaluate b x)
+unevaluate b (EPair f x) = EPair <$> unevaluate b f <*> unevaluate b x
 unevaluate b x = return x
 
 listidate :: Expression -> [(Name, Expression)]
 listidate (EPair (EPair x (ESymbol z)) y) = (z, y) : listidate x
 listidate (EPair (ESymbol x) y) = [(x, y)]
-
-apply :: Expression -> Expression -> IO Expression
-apply (EProcedure f) x = f x
-apply f _ = error ("not a function: " ++ show f)
 
 fetch k b (Just v) = v
 fetch k b _ = error ("not a name: " ++ k)
@@ -69,11 +63,11 @@ systemEnv = sequence $ fromList
   ("if", liftIf),
   ("<", liftIntegerPredicate (<)),
   ("evaluate", liftEvaluate),
-  ("print", liftPrint putStrLn)]
+  ("print-character", liftPrintChar putChar)]
 
-liftPrint :: (String -> IO ()) -> IO Expression
-liftPrint f = let run = (return . getCharacter <$>) . evaluate (fromList empty) in
-                  return $ EProcedure (\ x -> (f =<< run x) >> return ENothing)
+liftPrintChar :: (Char -> IO ()) -> IO Expression
+liftPrintChar f = let run = (getCharacter <$>) . evaluate (fromList empty) in
+                      return $ EProcedure (\ x -> (f =<< run x) >> return ENothing)
 
 ite :: Bool -> a -> a -> a
 ite x y z = if x then y else z
@@ -110,11 +104,10 @@ liftInteger2 :: (Integer -> Integer -> Integer) -> IO Expression
 liftInteger2 f = let run = (getInteger <$>) . evaluate (fromList empty) in
                      return $ EProcedure (\ x -> return $ EProcedure (\ y -> EInteger <$> (f <$> run x <*> run y)))
 
-{-
 liftInteger3 :: (Integer -> Integer -> Integer -> Integer) -> IO Expression
-liftInteger3 f = let run = getInteger . evaluate (fromList empty) in
-                     EProcedure (\ x -> EProcedure (\ y -> EProcedure (\ z -> EInteger (f (run x) (run y) (run z)))))
--}
+liftInteger3 f = let run = (getInteger <$>) . evaluate (fromList empty) in
+                     return $ EProcedure (\ x -> return $ EProcedure (\ y -> return $ EProcedure (\ z -> EInteger <$> (f <$> run x <*> run y <*> run z))))
+
 
 liftIntegerPredicate :: (Integer -> Integer -> Bool) -> IO Expression
 liftIntegerPredicate f = let run = (getInteger <$>) . evaluate (fromList empty) in

@@ -15,6 +15,7 @@ testsEasy = [testNothingEasy,
              testDataEasy,
              testLazinessEasy,
              testTailEasy,
+             testOutputEasy,
              testCommentsEasy]
 
 testsHard :: [String]
@@ -28,6 +29,7 @@ testsHard = [testNothingHard,
              testDataHard,
              testLazinessHard,
              testTailHard,
+             testOutputHard,
              testCommentsHard]
 
 testNothingEasy :: String
@@ -168,6 +170,16 @@ testTailHard = "\
 \             13            \n\
 \             (f (- n 1)))))\n\
 \  (f 1048576)              \n\
+\"
+
+testOutputEasy :: String
+testOutputEasy = "\
+\print-character '!' io\n\
+\"
+
+testOutputHard :: String
+testOutputHard = "\
+\print-character '!' (print-character '?' io)\n\
 \"
 
 testCommentsEasy :: String

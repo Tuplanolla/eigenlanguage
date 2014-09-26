@@ -12,9 +12,8 @@ data Expression = EComment
                 | ELogical Bool
                 | EInteger Integer
                 | ECharacter Char
-                -- Might want to resurrect this.
-                | EFunction (Expression -> Expression)
                 -- These may be wrong.
+                | EFunction (Expression -> Expression) -- id
                 | EProcedure (Expression -> IO Expression) -- return . id
                 | EBind Environment Expression -- fromList []
                 | EArray (Array Int Expression) -- listArray (1, 0) []
