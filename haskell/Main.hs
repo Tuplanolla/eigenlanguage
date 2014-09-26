@@ -13,8 +13,8 @@ import Parser
 import Tester
 
 main :: IO ()
-main = loop
-gain = do let f x @ (_ : _) = test x
+gain = loop
+main = do let f x @ (_ : _) = test x
               f _ = do putStrLn "Have an example then."
                        testExamples
           putStrLn "Write code and hit done (Enter to flush and Ctrl D to stop), show examples (Ctrl D right now) or cancel (Ctrl C anywhere)."
@@ -55,7 +55,7 @@ test s = do putChar '\n'
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
-            let x = eigenevaluate e
+            x <- eigenevaluate e
             putStrLn ("Evaluated:\n" ++ show x)
 
 showWithSpaces :: Show a => [a] -> String

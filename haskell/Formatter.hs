@@ -13,8 +13,7 @@ format :: Bool -> Expression -> String
 format _ (EPair (ESymbol "`") x) = "`" ++ eigensubformat x
 format _ (EPair (ESymbol ",") x) = "," ++ eigensubformat x
 format True p @ (EPair _ _) = "(" ++ eigenformat p ++ ")"
-format _ (EPair f @ (ESymbol _) x) = eigenformat f ++ " " ++ eigensubformat x
-format _ (EPair x y) = eigenformat x ++ " " ++ eigenformat y
+format _ (EPair x y) = eigenformat x ++ " " ++ eigensubformat y
 format _ (ESymbol x) = x
 --
 format _ ENothing = "()"
