@@ -1,4 +1,5 @@
-module Common (Code, Environment, Expression (..), Name, Token (..)) where
+module Common (Code, Environment, Expression (..), Name, Structure (..),
+               Token (..)) where
 
 import Data.Array (Array)
 import Data.IORef (IORef)
@@ -7,30 +8,27 @@ import Prelude (Bool, Char, Integer, IO, Show, String)
 
 import Hack ()
 
-data Parse = PComment
-           | PPair Expression Expression
-           | PSymbol Name
-           --
-           | PNothing
-           | PInteger Integer
-           | PCharacter Char
-           deriving Show
-
-data Expression = EComment -- This is unsafe.
-                | EPair Expression Expression
+data Expression = EPair Expression Expression
                 | ESymbol Name
-                --
                 | ENothing
                 | ELogical Bool
                 | EInteger Integer
                 | ECharacter Char
-                -- These may be wrong.
-                | EUnique (IORef Bool)
+                | EFunction (Expression -> Expression)
+                | EBind Environment Expression
                 | EEffect (IO Expression)
-                | EFunction (Expression -> Expression) -- id
-                | EBind Environment Expression -- fromList []
+                | EUnique (IORef Bool)
                 | EArray (Array Integer Expression) -- listArray (1, 0) []
                 deriving Show
+
+data Structure = SComment
+               | SPair Structure Structure
+               | SSymbol Name
+               | SNothing
+               | SInteger Integer
+               | SCharacter Char
+               | SString String
+               deriving Show
 
 data Token = TComment
            | TPack
@@ -38,7 +36,6 @@ data Token = TComment
            | TOpen
            | TClose
            | TSymbol Name
-           --
            | TInteger Integer
            | TCharacter Char
            | TString String

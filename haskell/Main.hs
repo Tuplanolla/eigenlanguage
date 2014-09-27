@@ -12,33 +12,30 @@ import Lexer
 import Parser
 import Tester
 
-gain, main :: IO () -- Swap these to disable the interactive prompt.
-main = loop
-gain = do let f x @ (_ : _) = test x
-              f _ = do putStrLn "Have an example then."
-                       testExamples
-          putStrLn "Write code and hit done (Enter to flush and Ctrl D to stop), show examples (Ctrl D right now) or cancel (Ctrl C anywhere)."
-          x <- getContents
-          f x
+main :: IO ()
+main = do a <- getArgs
+          case a of
+             (_ : _) -> testExamples
+             _ -> loop
 
 testExamples :: IO ()
 testExamples = sequence_ $ test <$> (code <$> filter (not . (`elem` ignored)
                                                           . name) tests)
-               where ignored = [] -- All tests pass!
+               where ignored = ["Tail"] -- All tests pass, but Tail is slow.
 
 test :: String -> IO ()
 test s = do putChar '\n'
             putStr ("Read:\n" ++ s)
             let t = eigenlex s
-            putStrLn ("Tokenized:\n" ++ showWithSpaces t)
+            -- putStrLn ("Tokenized:\n" ++ showWithSpaces t)
             let e = eigenparse t
-            putStrLn ("Parsed:\n" ++ show e)
+            -- putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
             let x = eigenevaluate e
             putStrLn ("Evaluated:\n" ++ show x)
             case x of
-                 EEffect a -> do putStr ("Forced:\n")
+                 EEffect a -> do putStr ("Performed:\n")
                                  _ <- a
                                  putLn
                  _ -> return ()

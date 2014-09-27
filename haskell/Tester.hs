@@ -160,16 +160,16 @@ tests = [Test {name = "Nothing",
          Test {name = "Comments",
                difficulty = Easy,
                code = "\
-\- (* (+ 2 #comment 3)  \n\
-\     (+ 4 5)) # comment\n\
+\- (* (+ 2 %comment 3)  \n\
+\     (+ 4 5)) % comment\n\
 \  32                   \n\
 \"},
          Test {name = "Comments",
                difficulty = Hard,
                code = "\
-\- (* (+ 2 #(nested #comments # with       \n\
-\            #`more `#than one #(#line)) 3)\n\
-\     (#! + 4 5 #!))                       \n\
+\- (* (+ 2 %(nested %comments % with       \n\
+\            %`more `%than one %(%line)) 3)\n\
+\     (%! + 4 5 %!))                       \n\
 \  32                                      \n\
 \"}]
 

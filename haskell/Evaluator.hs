@@ -1,10 +1,10 @@
-module Evaluator where -- This is bad.
+module Evaluator where
 
-import Control.Applicative
+import Control.Applicative hiding (empty)
 import Control.Monad
 import Data.Functor
 import Data.IORef
-import Data.Map (Map, fromList, lookup, mapWithKey, union)
+import Data.Map (Map, empty, fromList, insert, lookup, singleton, union)
 import Prelude hiding (lookup)
 
 import Common
@@ -13,37 +13,46 @@ import Parser
 eigenevaluate :: Expression -> Expression
 eigenevaluate = evaluate systemEnv
 
+-- This is "the simplest that works", but may be stupid and do unnecessary work.
 evaluate :: Environment -> Expression -> Expression
-evaluate b (EFunction f) = EFunction (evaluate b . f)
-evaluate b (EPair (ESymbol "`") x) = unevaluate b x
-evaluate b (EPair (EPair (ESymbol "->")
-                         (ESymbol x)) y) = EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
-evaluate b (EPair (EPair (ESymbol "->")
-                         (EPair (ESymbol x) q)) y) = EFunction $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
-                                                                                          (EBind (fromList [(x, z)]) y))
-evaluate b (EPair (EPair (ESymbol "=") xs) y) = evaluate b (EBind (fromList (listidate xs)) y)
-evaluate b (EPair f x) = apply (evaluate b f) (evaluate b x)
-evaluate b (EBind e x) = let bind y z = evaluate b (EBind e z) in
-                             evaluate ((bind `mapWithKey` e) `union` b) x
-evaluate b (ESymbol k) = fetch k b (lookup k b)
-evaluate b (EEffect x) = EEffect (evaluate b <$> x)
-evaluate b x = x
+evaluate e (EPair (ESymbol "`") x) = unevaluate e x
+evaluate e (EPair (EPair (ESymbol "->")
+                         (ESymbol k)) x)
+         = let f v = evaluate e (EBind (singleton k v) x) in
+               EFunction f
+evaluate e (EPair (EPair (ESymbol "->")
+                         (EPair (ESymbol k) x)) y)
+         = let f v = evaluate e (EPair (EPair (ESymbol "->") x)
+                                       (EBind (singleton k v) y)) in
+               EFunction f
+evaluate e (EPair (EPair (ESymbol "=") b) x) = evaluate e (EBind (fold b) x)
+evaluate e (EPair x y) = apply (evaluate e x) (evaluate e y)
+evaluate e (ESymbol k) = fetch e k (lookup k e)
+evaluate e (EFunction f) = EFunction (evaluate e . f)
+evaluate e (EBind b x) = evaluate (union (propagate e b) e) x
+evaluate e (EEffect x) = EEffect (evaluate e <$> x)
+evaluate e x = x
 
 unevaluate :: Environment -> Expression -> Expression
-unevaluate b (EPair (ESymbol ",") x) = evaluate b x
-unevaluate b (EPair f x) = EPair (unevaluate b f) (unevaluate b x)
-unevaluate b x = x
+unevaluate e (EPair (ESymbol ",") x) = evaluate e x
+unevaluate e (EPair f x) = EPair (unevaluate e f) (unevaluate e x)
+unevaluate e x = x
 
-listidate :: Expression -> [(Name, Expression)]
-listidate (EPair (EPair x (ESymbol z)) y) = (z, y) : listidate x
-listidate (EPair (ESymbol x) y) = [(x, y)]
+-- Implement Foldable instead?
+fold :: Expression -> Environment
+fold (EPair (EPair x (ESymbol k)) v) = insert k v (fold x)
+fold (EPair (ESymbol k) v) = singleton k v
+
+-- Abstract something else instead?
+propagate :: Environment -> Environment -> Environment
+propagate e b = evaluate e . EBind b <$> b
 
 apply :: Expression -> Expression -> Expression
-apply (EFunction f) x = f x
-apply f _ = error ("not a function: " ++ show f)
+apply (EFunction f) y = f y
+apply x _ = error ("not a function: " ++ show x)
 
-fetch k b (Just v) = v
-fetch k b _ = error ("not a name: " ++ k)
+fetch e k (Just v) = v
+fetch e k _ = error ("not a name: " ++ show k ++ " in " ++ show e)
 
 systemEnv :: Environment
 systemEnv = fromList [("-", liftInteger2 (-)),
@@ -55,7 +64,7 @@ systemEnv = fromList [("-", liftInteger2 (-)),
                       ("if", liftIf),
                       ("<", liftIntegerPredicate (<)),
                       ("evaluate", liftEvaluate),
-                      ("io", EEffect $ EUnique <$> newIORef True),
+                      ("io", EEffect (EUnique <$> newIORef True)),
                       ("print-character", liftPC putChar)]
 
 touch :: IO () -> IORef Bool -> IO (IORef Bool)
@@ -68,12 +77,12 @@ touch a r = do x <- readIORef r
                     error "not a valid reference"
 
 liftPC :: (Char -> IO ()) -> Expression
-liftPC f = let run = getCharacter . evaluate (fromList empty)
-               run' = (getUnique <$>) . getEffect . evaluate (fromList empty) in
+liftPC f = let run = getCharacter . evaluate empty
+               run' = (getUnique <$>) . getEffect . evaluate empty in
                EFunction (\ x -> EFunction (\ y -> EEffect $ EUnique <$> (touch (f $ run x) =<< (run' y))))
 
 liftIf :: Expression
-liftIf = let run = getLogical . evaluate (fromList empty) in
+liftIf = let run = getLogical . evaluate empty in
              EFunction (\ x -> EFunction (\ y -> EFunction (\ z -> if run x then y else z)))
 
 liftAlways :: Expression
@@ -90,7 +99,7 @@ getEffect x = error ("not an effect: " ++ show x)
 
 getUnique :: Expression -> IORef Bool
 getUnique (EUnique x) = x
-getUnique x = error ("not a uniqueness type: " ++ show x)
+getUnique x = error ("not a unique type: " ++ show x)
 
 getInteger :: Expression -> Integer
 getInteger (EInteger x) = x
@@ -105,19 +114,19 @@ getCharacter (ECharacter x) = x
 getCharacter x = error ("not a character: " ++ show x)
 
 liftInteger :: (Integer -> Integer) -> Expression
-liftInteger f = let run = getInteger . evaluate (fromList empty) in
+liftInteger f = let run = getInteger . evaluate empty in
                     EFunction (\ x -> EInteger (f (run x)))
 
 liftInteger2 :: (Integer -> Integer -> Integer) -> Expression
-liftInteger2 f = let run = getInteger . evaluate (fromList empty) in
+liftInteger2 f = let run = getInteger . evaluate empty in
                      EFunction (\ x -> EFunction (\ y -> EInteger (f (run x) (run y))))
 
 liftInteger3 :: (Integer -> Integer -> Integer -> Integer) -> Expression
-liftInteger3 f = let run = getInteger . evaluate (fromList empty) in
+liftInteger3 f = let run = getInteger . evaluate empty in
                      EFunction (\ x -> EFunction (\ y -> EFunction (\ z -> EInteger (f (run x) (run y) (run z)))))
 
 liftIntegerPredicate :: (Integer -> Integer -> Bool) -> Expression
-liftIntegerPredicate f = let run = getInteger . evaluate (fromList empty) in
+liftIntegerPredicate f = let run = getInteger . evaluate empty in
                              EFunction (\ x -> EFunction (\ y -> ELogical (f (run x) (run y))))
 
 putLn :: IO ()

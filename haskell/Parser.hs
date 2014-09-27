@@ -1,14 +1,14 @@
 {-# OPTIONS_GHC -w #-}
 module Parser (eigenparse) where
 
-import Common (Expression (..), Token (..))
+import Common (Expression (..), Structure (..), Token (..))
 
 -- parser produced by Happy Version 1.19.0
 
 data HappyAbsSyn t5 t6 t7 t8 t9 t10 t11 t12 t13
 	= HappyTerminal (Token)
 	| HappyErrorToken Int
-	| HappyAbsSyn4 (Expression)
+	| HappyAbsSyn4 (Structure)
 	| HappyAbsSyn5 t5
 	| HappyAbsSyn6 t6
 	| HappyAbsSyn7 t7
@@ -208,14 +208,14 @@ happyReduce_2 = happySpecReduce_2  5 happyReduction_2
 happyReduction_2 _
 	_
 	 =  HappyAbsSyn5
-		 (EComment
+		 (SComment
 	)
 
 happyReduce_3 = happySpecReduce_2  5 happyReduction_3
 happyReduction_3 (HappyAbsSyn6  happy_var_2)
 	_
 	 =  HappyAbsSyn5
-		 (EPair (ESymbol "`") happy_var_2
+		 (SPair (SSymbol "`") happy_var_2
 	)
 happyReduction_3 _ _  = notHappyAtAll 
 
@@ -236,7 +236,7 @@ happyReduction_5 _  = notHappyAtAll
 happyReduce_6 = happySpecReduce_1  5 happyReduction_6
 happyReduction_6 (HappyTerminal (TSymbol happy_var_1))
 	 =  HappyAbsSyn5
-		 (ESymbol happy_var_1
+		 (SSymbol happy_var_1
 	)
 happyReduction_6 _  = notHappyAtAll 
 
@@ -244,14 +244,14 @@ happyReduce_7 = happySpecReduce_2  6 happyReduction_7
 happyReduction_7 _
 	_
 	 =  HappyAbsSyn6
-		 (EComment
+		 (SComment
 	)
 
 happyReduce_8 = happySpecReduce_2  6 happyReduction_8
 happyReduction_8 (HappyAbsSyn5  happy_var_2)
 	_
 	 =  HappyAbsSyn6
-		 (EPair (ESymbol ",") happy_var_2
+		 (SPair (SSymbol ",") happy_var_2
 	)
 happyReduction_8 _ _  = notHappyAtAll 
 
@@ -272,7 +272,7 @@ happyReduction_10 _  = notHappyAtAll
 happyReduce_11 = happySpecReduce_1  6 happyReduction_11
 happyReduction_11 (HappyTerminal (TSymbol happy_var_1))
 	 =  HappyAbsSyn6
-		 (ESymbol happy_var_1
+		 (SSymbol happy_var_1
 	)
 happyReduction_11 _  = notHappyAtAll 
 
@@ -296,7 +296,7 @@ happyReduction_13 _ _ _  = notHappyAtAll
 
 happyReduce_14 = happySpecReduce_0  9 happyReduction_14
 happyReduction_14  =  HappyAbsSyn9
-		 (ENothing
+		 (SNothing
 	)
 
 happyReduce_15 = happySpecReduce_1  9 happyReduction_15
@@ -308,7 +308,7 @@ happyReduction_15 _  = notHappyAtAll
 
 happyReduce_16 = happySpecReduce_0  10 happyReduction_16
 happyReduction_16  =  HappyAbsSyn10
-		 (ENothing
+		 (SNothing
 	)
 
 happyReduce_17 = happySpecReduce_1  10 happyReduction_17
@@ -329,7 +329,7 @@ happyReduce_19 = happySpecReduce_2  11 happyReduction_19
 happyReduction_19 (HappyAbsSyn5  happy_var_2)
 	(HappyAbsSyn11  happy_var_1)
 	 =  HappyAbsSyn11
-		 (EPair happy_var_1 happy_var_2
+		 (SPair happy_var_1 happy_var_2
 	)
 happyReduction_19 _ _  = notHappyAtAll 
 
@@ -344,28 +344,28 @@ happyReduce_21 = happySpecReduce_2  12 happyReduction_21
 happyReduction_21 (HappyAbsSyn6  happy_var_2)
 	(HappyAbsSyn12  happy_var_1)
 	 =  HappyAbsSyn12
-		 (EPair happy_var_1 happy_var_2
+		 (SPair happy_var_1 happy_var_2
 	)
 happyReduction_21 _ _  = notHappyAtAll 
 
 happyReduce_22 = happySpecReduce_1  13 happyReduction_22
 happyReduction_22 (HappyTerminal (TInteger happy_var_1))
 	 =  HappyAbsSyn13
-		 (EInteger happy_var_1
+		 (SInteger happy_var_1
 	)
 happyReduction_22 _  = notHappyAtAll 
 
 happyReduce_23 = happySpecReduce_1  13 happyReduction_23
 happyReduction_23 (HappyTerminal (TCharacter happy_var_1))
 	 =  HappyAbsSyn13
-		 (ECharacter happy_var_1
+		 (SCharacter happy_var_1
 	)
 happyReduction_23 _  = notHappyAtAll 
 
 happyReduce_24 = happySpecReduce_1  13 happyReduction_24
 happyReduction_24 (HappyTerminal (TString happy_var_1))
 	 =  HappyAbsSyn13
-		 (EPair (ESymbol "`") (foldr (EPair . ECharacter) ENothing happy_var_1)
+		 (SPair (SSymbol "`") (SString happy_var_1)
 	)
 happyReduction_24 _  = notHappyAtAll 
 
@@ -408,7 +408,7 @@ happyReturn1 = \a tks -> (return) a
 happyError' :: () => [(Token)] -> HappyIdentity a
 happyError' = HappyIdentity . eigenfail
 
-eigensemiparse tks = happyRunIdentity happySomeParser where
+eigenstructure tks = happyRunIdentity happySomeParser where
   happySomeParser = happyThen (happyParse action_0 tks) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
 
 happySeq = happyDontSeq
@@ -419,16 +419,19 @@ eigenfail (x : _) = error ("failed to parse: " ++ show x)
 eigenfail _ = error "failed to parse"
 
 eigenparse :: [Token] -> Expression
-eigenparse = eigenstrip . eigensemiparse
+eigenparse = eigenexpress . eigenstructure
 
--- eigenstrip :: Parse -> Expression
-eigenstrip :: Expression -> Expression
-eigenstrip (EPair EComment EComment) = ENothing
-eigenstrip (EPair EComment y) = eigenstrip y
-eigenstrip (EPair x EComment) = eigenstrip x
-eigenstrip (EPair x y) = EPair (eigenstrip x) (eigenstrip y)
-eigenstrip EComment = ENothing
-eigenstrip x = x
+eigenexpress :: Structure -> Expression
+eigenexpress SComment = ENothing
+eigenexpress (SPair SComment SComment) = ENothing
+eigenexpress (SPair SComment y) = eigenexpress y
+eigenexpress (SPair x SComment) = eigenexpress x
+eigenexpress (SPair x y) = EPair (eigenexpress x) (eigenexpress y)
+eigenexpress (SSymbol x) = ESymbol x
+eigenexpress SNothing = ENothing
+eigenexpress (SInteger x) = EInteger x
+eigenexpress (SCharacter x) = ECharacter x
+eigenexpress (SString x) = foldr (EPair . ECharacter) ENothing x
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 {-# LINE 1 "<command-line>" #-}

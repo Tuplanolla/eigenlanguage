@@ -1,7 +1,7 @@
 {
 module Parser (eigenparse) where
 
-import Common (Expression (..), Token (..))
+import Common (Expression (..), Structure (..), Token (..))
 }
 
 %tokentype {Token}
@@ -19,44 +19,44 @@ import Common (Expression (..), Token (..))
 
 %error {eigenfail}
 
-%name eigensemiparse program
+%name eigenstructure program
 
 %%
 
-program :: {Expression}
+program :: {Structure}
         : something {$1}
 
-piece : COMMENT piece {EComment}
-      | PACK unpiece  {EPair (ESymbol "`") $2}
+piece : COMMENT piece {SComment}
+      | PACK unpiece  {SPair (SSymbol "`") $2}
       | group         {$1}
       | value         {$1}
-      | SYMBOL        {ESymbol $1}
+      | SYMBOL        {SSymbol $1}
 
-unpiece : COMMENT unpiece {EComment}
-        | UNPACK piece    {EPair (ESymbol ",") $2}
+unpiece : COMMENT unpiece {SComment}
+        | UNPACK piece    {SPair (SSymbol ",") $2}
         | ungroup         {$1}
         | value           {$1}
-        | SYMBOL          {ESymbol $1}
+        | SYMBOL          {SSymbol $1}
 
 group : OPEN something CLOSE {$2}
 
 ungroup : OPEN unsomething CLOSE {$2}
 
-something : {- NOTHING -} {ENothing}
+something : {- NOTHING -} {SNothing}
           | pieces        {$1}
 
-unsomething : {- NOTHING -} {ENothing}
+unsomething : {- NOTHING -} {SNothing}
             | unpieces      {$1}
 
 pieces : piece        {$1}
-       | pieces piece {EPair $1 $2}
+       | pieces piece {SPair $1 $2}
 
 unpieces : unpiece          {$1}
-         | unpieces unpiece {EPair $1 $2}
+         | unpieces unpiece {SPair $1 $2}
 
-value : INTEGER   {EInteger $1}
-      | CHARACTER {ECharacter $1}
-      | STRING    {EPair (ESymbol "`") (foldr (EPair . ECharacter) ENothing $1)}
+value : INTEGER   {SInteger $1}
+      | CHARACTER {SCharacter $1}
+      | STRING    {SPair (SSymbol "`") (SString $1)}
 
 {
 eigenfail :: [Token] -> a
@@ -64,14 +64,17 @@ eigenfail (x : _) = error ("failed to parse: " ++ show x)
 eigenfail _ = error "failed to parse"
 
 eigenparse :: [Token] -> Expression
-eigenparse = eigenstrip . eigensemiparse
+eigenparse = eigenexpress . eigenstructure
 
--- eigenstrip :: Parse -> Expression
-eigenstrip :: Expression -> Expression
-eigenstrip (EPair EComment EComment) = ENothing
-eigenstrip (EPair EComment y) = eigenstrip y
-eigenstrip (EPair x EComment) = eigenstrip x
-eigenstrip (EPair x y) = EPair (eigenstrip x) (eigenstrip y)
-eigenstrip EComment = ENothing
-eigenstrip x = x
+eigenexpress :: Structure -> Expression
+eigenexpress SComment = ENothing
+eigenexpress (SPair SComment SComment) = ENothing
+eigenexpress (SPair SComment y) = eigenexpress y
+eigenexpress (SPair x SComment) = eigenexpress x
+eigenexpress (SPair x y) = EPair (eigenexpress x) (eigenexpress y)
+eigenexpress (SSymbol x) = ESymbol x
+eigenexpress SNothing = ENothing
+eigenexpress (SInteger x) = EInteger x
+eigenexpress (SCharacter x) = ECharacter x
+eigenexpress (SString x) = foldr (EPair . ECharacter) ENothing x
 }
