@@ -16,13 +16,12 @@ eigenevaluate = evaluate systemEnv
 evaluate :: Environment -> Expression -> Expression
 evaluate b (EFunction f) = EFunction (evaluate b . f)
 evaluate b (EPair (ESymbol "`") x) = unevaluate b x
-evaluate b (EPair (EPair (ESymbol "->") (ESymbol x)) y)
- = EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
-evaluate b (EPair (EPair (ESymbol "->") (EPair (ESymbol x) q)) y)
- = EFunction $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
-                                        (EBind (fromList [(x, z)]) y))
-evaluate b (EPair (EPair (ESymbol "=") xs) y)
- = evaluate b (EBind (fromList (listidate xs)) y)
+evaluate b (EPair (EPair (ESymbol "->")
+                         (ESymbol x)) y) = EFunction $ \ z -> evaluate b (EBind (fromList [(x, z)]) y)
+evaluate b (EPair (EPair (ESymbol "->")
+                         (EPair (ESymbol x) q)) y) = EFunction $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
+                                                                                          (EBind (fromList [(x, z)]) y))
+evaluate b (EPair (EPair (ESymbol "=") xs) y) = evaluate b (EBind (fromList (listidate xs)) y)
 evaluate b (EPair f x) = apply (evaluate b f) (evaluate b x)
 evaluate b (EBind e x) = let bind y z = evaluate b (EBind e z) in
                              evaluate ((bind `mapWithKey` e) `union` b) x
@@ -46,9 +45,6 @@ apply f _ = error ("not a function: " ++ show f)
 fetch k b (Just v) = v
 fetch k b _ = error ("not a name: " ++ k)
 
-assoc :: Eq k => k -> v -> [(k, v)] -> [(k, v)]
-assoc k v xs = (k, v) : filter ((k /=) . fst) xs
-
 systemEnv :: Environment
 systemEnv = fromList [("-", liftInteger2 (-)),
                       ("*", liftInteger2 (*)),
@@ -62,19 +58,19 @@ systemEnv = fromList [("-", liftInteger2 (-)),
                       ("io", EEffect $ EUnique <$> newIORef True),
                       ("print-character", liftPC putChar)]
 
-touch :: IO () -> IORef Bool -> IO Expression
+touch :: IO () -> IORef Bool -> IO (IORef Bool)
 touch a r = do x <- readIORef r
                if x then
                     do writeIORef r False
                        _ <- a
                        r <- newIORef True
-                       return (EUnique r) else
+                       return r else
                     error "not a valid reference"
 
 liftPC :: (Char -> IO ()) -> Expression
 liftPC f = let run = getCharacter . evaluate (fromList empty)
                run' = (getUnique <$>) . getEffect . evaluate (fromList empty) in
-               EFunction (\ x -> EFunction (\ y -> EEffect (touch (f $ run x) =<< (run' y))))
+               EFunction (\ x -> EFunction (\ y -> EEffect $ EUnique <$> (touch (f $ run x) =<< (run' y))))
 
 liftIf :: Expression
 liftIf = let run = getLogical . evaluate (fromList empty) in

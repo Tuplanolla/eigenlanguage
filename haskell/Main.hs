@@ -22,8 +22,9 @@ gain = do let f x @ (_ : _) = test x
           f x
 
 testExamples :: IO ()
-testExamples = sequence_ $ test <$> (code <$> filter (not . (`elem` ts) . name) tests)
-               where ts = ["Scope", "Recursion", "Laziness", "Tail"]
+testExamples = sequence_ $ test <$> (code <$> filter (not . (`elem` ignored)
+                                                          . name) tests)
+               where ignored = [] -- All tests pass!
 
 test :: String -> IO ()
 test s = do putChar '\n'

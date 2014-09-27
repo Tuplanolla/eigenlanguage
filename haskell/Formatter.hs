@@ -21,3 +21,4 @@ format _ (EUnique x) = show x
 format _ (EEffect x) = show x
 format _ (EInteger x) = show x
 format _ (ECharacter x) = show x
+format _ x = "[" ++ show x ++ "]"
