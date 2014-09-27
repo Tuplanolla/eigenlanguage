@@ -12,7 +12,7 @@ import Lexer
 import Parser
 import Tester
 
-main :: IO ()
+gain, main :: IO () -- Swap these to disable the interactive prompt.
 main = loop
 gain = do let f x @ (_ : _) = test x
               f _ = do putStrLn "Have an example then."
@@ -34,8 +34,13 @@ test s = do putChar '\n'
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
-            x <- eigenevaluate e
+            let x = eigenevaluate e
             putStrLn ("Evaluated:\n" ++ show x)
+            case x of
+                 EEffect a -> do putStr ("Forced:\n")
+                                 _ <- a
+                                 putLn
+                 _ -> return ()
 
 showWithSpaces :: Show a => [a] -> String
 showWithSpaces = intercalate " " . map (("(" ++) . (++ ")") . show)

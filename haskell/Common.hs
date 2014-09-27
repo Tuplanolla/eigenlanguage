@@ -7,7 +7,16 @@ import Prelude (Bool, Char, Integer, IO, Show, String)
 
 import Hack ()
 
-data Expression = EComment
+data Parse = PComment
+           | PPair Expression Expression
+           | PSymbol Name
+           --
+           | PNothing
+           | PInteger Integer
+           | PCharacter Char
+           deriving Show
+
+data Expression = EComment -- This is unsafe.
                 | EPair Expression Expression
                 | ESymbol Name
                 --
@@ -17,8 +26,8 @@ data Expression = EComment
                 | ECharacter Char
                 -- These may be wrong.
                 | EUnique (IORef Bool)
+                | EEffect (IO Expression)
                 | EFunction (Expression -> Expression) -- id
-                | EProcedure (Expression -> IO Expression) -- return . id
                 | EBind Environment Expression -- fromList []
                 | EArray (Array Integer Expression) -- listArray (1, 0) []
                 deriving Show

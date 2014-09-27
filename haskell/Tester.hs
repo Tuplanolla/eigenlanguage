@@ -146,13 +146,16 @@ tests = [Test {name = "Nothing",
          Test {name = "Output",
                difficulty = Easy,
                code = "\
-\print-character '1' io\n\
+\print-character '3' (print-character '1' io)\n\
 \"},
          Test {name = "Output",
                difficulty = Hard,
                code = "\
-\= (io' (print-character '1' io))\n\
-\  (print-character '3' io')     \n\
+\= (io'' (= (io' (print-character '1' io))  \n\
+\           (if (< 3 2)                     \n\
+\               (print-character '2' io')   \n\
+\               (print-character '3' io'))))\n\
+\  io''                                     \n\
 \"},
          Test {name = "Comments",
                difficulty = Easy,

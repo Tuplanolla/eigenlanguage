@@ -1,7 +1,7 @@
 module Interpreter (loop) where
 
 import Common
-import Evaluator
+import Evaluator hiding (putLn)
 import Formatter
 import Lexer
 import Parser
@@ -26,9 +26,11 @@ loopWith (d, t) = do if d > 0 then
                            let ds = d + depth ts
                            if ds > 0 then -- It's called a bird's nest.
                               loopWith (ds, t ++ ts) else
-                              do e <- eigenevaluate . eigenparse $ t ++ ts
+                              do let e = eigenevaluate . eigenparse $ t ++ ts
                                  case e of
                                       ENothing -> return ()
+                                      EEffect x -> do _ <- x
+                                                      return ()
                                       _ -> putStrLn . eigenformat $ e
                                  loopWith (0, []) `catch` -- It's good.
                                   \ e -> do putStrLn . show $ (e :: SomeException)

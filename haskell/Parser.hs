@@ -421,6 +421,7 @@ eigenfail _ = error "failed to parse"
 eigenparse :: [Token] -> Expression
 eigenparse = eigenstrip . eigensemiparse
 
+-- eigenstrip :: Parse -> Expression
 eigenstrip :: Expression -> Expression
 eigenstrip (EPair EComment EComment) = ENothing
 eigenstrip (EPair EComment y) = eigenstrip y
