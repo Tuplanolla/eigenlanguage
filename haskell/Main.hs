@@ -1,7 +1,7 @@
 module Main where
 
 import Data.Functor
-import Data.List (intercalate)
+import Data.List (elem, intercalate)
 import System.Environment
 
 import Common
@@ -13,8 +13,8 @@ import Parser
 import Tester
 
 main :: IO ()
-gain = loop
-main = do let f x @ (_ : _) = test x
+main = loop
+gain = do let f x @ (_ : _) = test x
               f _ = do putStrLn "Have an example then."
                        testExamples
           putStrLn "Write code and hit done (Enter to flush and Ctrl D to stop), show examples (Ctrl D right now) or cancel (Ctrl C anywhere)."
@@ -22,29 +22,8 @@ main = do let f x @ (_ : _) = test x
           f x
 
 testExamples :: IO ()
-testExamples = sequence_ $ test <$> [
- testNothingEasy,
- testValueEasy,
- testArithmeticEasy,
- testBindingEasy,
- testScopeEasy,
- testFunctionEasy,
- testRecursionEasy,
- testDataEasy,
- testLazinessEasy,
- testTailEasy,
- testCommentsEasy,
- testNothingHard,
- testValueHard,
- testArithmeticHard,
- testBindingHard,
- testScopeHard,
- testFunctionHard,
- testRecursionHard,
- testDataHard,
- testLazinessHard,
- -- testTailHard, -- This is slow.
- testCommentsHard]
+testExamples = sequence_ $ test <$> (code <$> filter (not . (`elem` ts) . name) tests)
+               where ts = ["Scope", "Recursion", "Laziness", "Tail"]
 
 test :: String -> IO ()
 test s = do putChar '\n'

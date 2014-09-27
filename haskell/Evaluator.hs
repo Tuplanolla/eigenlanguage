@@ -1,4 +1,4 @@
-module Evaluator where -- This is bad.
+module Evaluator where -- This is very bad.
 
 import Control.Applicative
 import Control.Monad hiding (sequence)
@@ -7,12 +7,13 @@ import Data.IORef
 import Data.Map (Map, fromList, lookup, mapWithKey, union)
 import Data.Traversable
 import Prelude hiding (lookup, sequence)
+import System.IO.Unsafe
 
 import Common
 import Parser
 
 eigenevaluate :: Expression -> IO Expression
-eigenevaluate x = do e <- systemEnv
+eigenevaluate x = do e <- systemEnv True
                      evaluate e x
 
 evaluate :: Environment -> Expression -> IO Expression
@@ -24,8 +25,8 @@ evaluate b (EPair (EPair (ESymbol "->")
                          (EPair (ESymbol x) q)) y) = return $ EProcedure $ \ z -> evaluate b (EPair (EPair (ESymbol "->") q)
                                                       (EBind (fromList [(x, z)]) y))
 evaluate b (EPair (EPair (ESymbol "=") xs) y) = evaluate b (EBind (fromList (listidate xs)) y)
-evaluate b (EPair f x) = do p <- evaluate b f
-                            q <- evaluate b x
+evaluate b (EPair f x) = do p <- evaluate (union ({- temporary -} unsafePerformIO (systemEnv False)) b) f
+                            q <- evaluate (union ({- temporary -} unsafePerformIO (systemEnv False)) b) x
                             apply p q -- Both branches of if are evaluated here.
 evaluate b (EBind e x) = evaluate (union e b) x
 evaluate b (ESymbol k) = return $ fetch k b (lookup k b)
@@ -45,10 +46,10 @@ listidate (EPair (EPair x (ESymbol z)) y) = (z, y) : listidate x
 listidate (EPair (ESymbol x) y) = [(x, y)]
 
 fetch k b (Just v) = v
-fetch k b _ = error ("not a name: " ++ k)
+fetch k b _ = error ("not a name: " ++ k ++ " in " ++ show b)
 
-systemEnv :: IO Environment
-systemEnv = sequence $ fromList
+systemEnv :: Bool -> IO Environment -- The parameter controls uniqueness type renewal until the temporary hack in apply is gone.
+systemEnv b = sequence $ fromList
  [("-", liftInteger2 (-)),
   ("*", liftInteger2 (*)),
   ("+", liftInteger2 (+)),
@@ -58,7 +59,7 @@ systemEnv = sequence $ fromList
   ("if", liftIf),
   ("<", liftIntegerPredicate (<)),
   ("evaluate", liftEvaluate),
-  ("io", EUnique <$> newIORef True),
+  ("io", EUnique <$> newIORef b),
   ("print-character", liftPrintChar putChar)]
 
 touch :: IO () -> Expression -> IO Expression
@@ -69,10 +70,11 @@ touch a (EUnique r) = do x <- readIORef r
                                  r <- newIORef True
                                  return (EUnique r) else
                               error "not a valid reference"
+touch _ e = error ("not a reference: " ++ show e)
 
 liftPrintChar :: (Char -> IO ()) -> IO Expression
 liftPrintChar f = let run = (getCharacter <$>) . evaluate (fromList empty) in
-                      return $ EProcedure (\ x -> (f =<< run x) >> return ENothing)
+                      return $ EProcedure (\ x -> return $ EProcedure (\ y -> touch (f =<< run x) =<< (evaluate (fromList empty) y)))
 
 ite :: Bool -> a -> a -> a
 ite x y z = if x then y else z

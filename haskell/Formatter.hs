@@ -17,5 +17,6 @@ format _ (EPair x y) = eigenformat x ++ " " ++ eigensubformat y
 format _ (ESymbol x) = x
 --
 format _ ENothing = "()"
+format _ (EUnique x) = show x
 format _ (EInteger x) = show x
 format _ (ECharacter x) = show x
