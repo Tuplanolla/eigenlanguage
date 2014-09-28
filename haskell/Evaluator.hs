@@ -4,6 +4,7 @@ import Control.Applicative hiding (empty)
 import Control.Monad
 import Data.Functor
 import Data.IORef
+-- Hide environment manipulation behind a type class?
 import Data.Map (Map, empty, fromList, insert, lookup, singleton, union)
 import Prelude hiding (lookup)
 
@@ -24,8 +25,8 @@ evaluate e (EPair (EPair (ESymbol "->")
                          (EPair (ESymbol k) x)) y)
          = let f v = evaluate e (EPair (EPair (ESymbol "->") x)
                                        (EBind (singleton k v) y)) in
-               EFunction f
-evaluate e (EPair (EPair (ESymbol "=") b) x) = evaluate e (EBind (fold b) x)
+               EFunction f -- Fold here instead?
+evaluate e (EPair (EPair (ESymbol "<-") b) x) = evaluate e (EBind (fold b) x)
 evaluate e (EPair x y) = apply (evaluate e x) (evaluate e y)
 evaluate e (ESymbol k) = fetch e k (lookup k e)
 evaluate e (EFunction f) = EFunction (evaluate e . f)

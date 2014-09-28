@@ -29,9 +29,9 @@ A detailed explanation in the form of unintelligible rambling is available on
 	IO
 	%# #perform % The result is merely a description of effects that can be run.
 	?
-	%#9 = (square (-> x
-	%..               (* x x))
-	%..    meaning #5) (square meaning) % Those were the three special forms.
+	%#9 <- (square (-> x
+	%..                (* x x))
+	%..     meaning #5) (square meaning) % Those were the three special forms.
 	1764
 	%#10 - # %(This is a syntactic comment.) 1024
 	740

@@ -10,6 +10,9 @@ deep-clean: clean
 	$(RM) Lexer.hs Parser.hs
 
 run: Main
+	command -v rlwrap > /dev/null && rlwrap ./Main || ./Main
+
+test: Main
 	command -v rlwrap > /dev/null && rlwrap ./Main b || ./Main b
 
 Main: Common.hs Evaluator.hs Formatter.hs Hack.hs Interpreter.hs Lexer.hs Main.hs Parser.hs Tester.hs

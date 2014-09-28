@@ -40,37 +40,37 @@ tests = [Test {name = "Nothing",
          Test {name = "Binding",
                difficulty = Easy,
                code = "\
-\- (+ 2 (= (x 3)    \n\
-\          (* x 4)))\n\
-\  1                \n\
+\- (+ 2 (<- (x 3)    \n\
+\           (* x 4)))\n\
+\  1                 \n\
 \"},
          Test {name = "Binding",
                difficulty = Hard,
                code = "\
-\- (+ 2 (= (x 3     \n\
-\           y 4)    \n\
-\          (* x y)))\n\
-\  1                \n\
+\- (+ 2 (<- (x 3     \n\
+\            y 4)    \n\
+\           (* x y)))\n\
+\  1                 \n\
 \"},
          Test {name = "Scope",
                difficulty = Easy,
                code = "\
-\= (x 4)             \n\
-\  (- (+ 2           \n\
-\        (= (y 3)    \n\
-\           (* y x)))\n\
-\     1)             \n\
+\<- (x 4)              \n\
+\   (- (+ 2            \n\
+\         (<- (y 3)    \n\
+\             (* y x)))\n\
+\      1)              \n\
 \"},
          Test {name = "Scope",
                difficulty = Hard,
                code = "\
-\= (x 2)               \n\
-\  (- (+ x             \n\
-\        (= (x (+ y 3) \n\
-\            y 4       \n\
-\            z (- x 5))\n\
-\           (* x z)))  \n\
-\     3)               \n\
+\<- (x 2)                \n\
+\   (- (+ x              \n\
+\         (<- (x (+ y 3) \n\
+\              y 4       \n\
+\              z (- x 5))\n\
+\             (* x z)))  \n\
+\      3)                \n\
 \"},
          Test {name = "Function",
                difficulty = Easy,
@@ -85,21 +85,21 @@ tests = [Test {name = "Nothing",
          Test {name = "Recursion",
                difficulty = Easy,
                code = "\
-\= (f (-> n                       \n\
-\         (if (< n 2)             \n\
-\             n                   \n\
-\             (* n (f (- n 1))))))\n\
-\  (- (f 4) 11)                   \n\
+\<- (f (-> n                       \n\
+\          (if (< n 2)             \n\
+\              n                   \n\
+\              (* n (f (- n 1))))))\n\
+\   (- (f 4) 11)                   \n\
 \"},
          Test {name = "Recursion",
                difficulty = Hard,
                code = "\
-\= (f (-> n                     \n\
-\         (if (< n 2)           \n\
-\             n                 \n\
-\             (+ (f (- n 1))    \n\
-\                (f (- n 2))))))\n\
-\  (f 7)                        \n\
+\<- (f (-> n                     \n\
+\          (if (< n 2)           \n\
+\              n                 \n\
+\              (+ (f (- n 1))    \n\
+\                 (f (- n 2))))))\n\
+\   (f 7)                        \n\
 \"},
          Test {name = "Data",
                difficulty = Easy,
@@ -114,34 +114,34 @@ tests = [Test {name = "Nothing",
          Test {name = "Laziness",
                difficulty = Easy,
                code = "\
-\if (< 2 3)            \n\
-\   13                 \n\
-\   (= (f (-> x (f x)))\n\
-\      (f f))          \n\
+\if (< 2 3)             \n\
+\   13                  \n\
+\   (<- (f (-> x (f x)))\n\
+\       (f f))          \n\
 \"},
          Test {name = "Laziness",
                difficulty = Hard,
                code = "\
-\always 13 (= (f (-> x (f x)))\n\
-\             (f f))          \n\
+\always 13 (<- (f (-> x (f x)))\n\
+\              (f f))          \n\
 \"},
          Test {name = "Tail",
                difficulty = Easy,
                code = "\
-\= (f (-> n                 \n\
-\         (if (< n 1)       \n\
-\             13            \n\
-\             (f (- n 1)))))\n\
-\  (f 1024)                 \n\
+\<- (f (-> n                 \n\
+\          (if (< n 1)       \n\
+\              13            \n\
+\              (f (- n 1)))))\n\
+\   (f 1024)                 \n\
 \"},
          Test {name = "Tail",
                difficulty = Hard,
                code = "\
-\= (f (-> n                 \n\
-\         (if (< n 1)       \n\
-\             13            \n\
-\             (f (- n 1)))))\n\
-\  (f 1048576)              \n\
+\<- (f (-> n                 \n\
+\          (if (< n 1)       \n\
+\              13            \n\
+\              (f (- n 1)))))\n\
+\   (f 1048576)              \n\
 \"},
          Test {name = "Output",
                difficulty = Easy,
@@ -151,11 +151,11 @@ tests = [Test {name = "Nothing",
          Test {name = "Output",
                difficulty = Hard,
                code = "\
-\= (io'' (= (io' (print-character '1' io))  \n\
-\           (if (< 3 2)                     \n\
-\               (print-character '2' io')   \n\
-\               (print-character '3' io'))))\n\
-\  io''                                     \n\
+\<- (io'' (<- (io' (print-character '1' io))  \n\
+\             (if (< 3 2)                     \n\
+\                 (print-character '2' io')   \n\
+\                 (print-character '3' io'))))\n\
+\   io''                                      \n\
 \"},
          Test {name = "Comments",
                difficulty = Easy,
