@@ -1,4 +1,4 @@
-module Tester (Test (..), tests) where
+module Tester (Test (..), tests) where -- This is deprecated.
 
 import Common (Code, Name)
 
