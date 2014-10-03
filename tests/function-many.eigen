@@ -1,0 +1,10 @@
+% name: function defition with many parameters
+% features: arithmetic function
+% stage: evaluate
+% type: expression
+% expected: 6
+
+-> (x y)
+   (+ x y)
+(-> x 2 3)
+4

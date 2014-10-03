@@ -1,0 +1,9 @@
+% name: basic arithmetic
+% features: arithmetic
+% stage: evaluate
+% type: expression
+% expected: 39
+
+- (* (+ 2 3)
+     (+ 4 5))
+  6

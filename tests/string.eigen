@@ -1,0 +1,8 @@
+% name: string literal
+% features: constant
+% stage: evaluate
+% type: expression
+% expected: 3
+
+always 3 "two"
+% length "two"

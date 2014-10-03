@@ -1,0 +1,11 @@
+% name: nested bindings
+% features: arithmetic bind
+% stage: evaluate
+% type: expression
+% expected: 25
+
+- (<- (x 2)
+      (* (+ x 3)
+         (<- (y 4)
+             (+ x y))))
+  5

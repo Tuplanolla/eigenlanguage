@@ -1,0 +1,11 @@
+% name: shadowing an existing binding
+% features: arithmetic bind
+% stage: evaluate
+% type: expression
+% expected: 39
+
+- (<- (x 2)
+      (* (+ x 3)
+         (<- (x 4)
+             (+ 5 x))))
+  6

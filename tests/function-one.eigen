@@ -1,0 +1,9 @@
+% name: function defition
+% features: arithmetic function
+% stage: evaluate
+% type: expression
+% expected: 5
+
+-> x
+   (+ 2 x)
+3

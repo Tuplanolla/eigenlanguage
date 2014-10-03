@@ -1,0 +1,7 @@
+% name: data definition
+% features: arithmetic data
+% stage: evaluate
+% type: expression
+% expected: 3
+
+length `(2 3 4)

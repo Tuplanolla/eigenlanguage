@@ -1,0 +1,7 @@
+% name: simple output
+% features: constant function io
+% stage: evaluate
+% type: effect
+% expected: "13"
+
+-> io (print-character '3' (print-character '1' io))

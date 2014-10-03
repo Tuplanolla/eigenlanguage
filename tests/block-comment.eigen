@@ -1,0 +1,14 @@
+% name: block comment
+% features: arithmetic comment
+% stage: evaluate
+% type: expression
+% expected: 39
+
+- (* (+ 2 3)
+     %% This is a comment that
+        spans several lines and
+        features special forms,
+    % % garbage % %
+      % and unmatched parentheses. :) %%
+     (+ 4 5))
+  6

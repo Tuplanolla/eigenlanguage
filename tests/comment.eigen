@@ -1,0 +1,7 @@
+% name: nothing but a comment
+% features: comment nothing
+% stage: evaluate
+% type: expression
+% expected: ()
+
+%(This is just a comment.) % This is just another comment.

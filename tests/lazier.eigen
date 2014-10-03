@@ -1,0 +1,8 @@
+% name: very lazy evaluation
+% features: arithmetic bind function lazy
+% stage: evaluate
+% type: expression
+% expected: 4
+
+always 4 (<- (f (-> g (f g)))
+             (f f))

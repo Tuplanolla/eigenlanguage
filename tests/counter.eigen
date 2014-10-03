@@ -1,0 +1,11 @@
+% name: counter
+% features: arithmetic bind function if recursion tail-recursion
+% stage: evaluate
+% type: expression
+% expected: 0
+
+<- (f (-> n
+          (if (< n 1)
+              n
+              (f (- n 1)))))
+   (f %1048576 1024)
