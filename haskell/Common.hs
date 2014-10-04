@@ -35,6 +35,8 @@ data Token = TComment
            | TUnpack
            | TOpen
            | TClose
+           | TDualOpen
+           | TDualClose
            | TSymbol Name
            | TInteger Integer
            | TCharacter Char

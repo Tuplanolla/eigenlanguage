@@ -16,11 +16,13 @@ lexemes :- $break+                            ;
            \,                                 {const TUnpack}
            \(                                 {const TOpen}
            \)                                 {const TClose}
+           \[                                 {const TDualOpen}
+           \]                                 {const TDualClose}
            [\+\-]?[0-9]+(\^[0-9]+)?(_[0-9]+)? {TInteger . readInteger}
            -- TCyclotomic should be here and cover the complex field extension.
            '(\\.|[^\\'])+'                    {TCharacter . readCharacter}
            \"(\\.|[^\\\"])*\"                 {TString . readString}
-           ~[\%`\,\(\)$break]+                {TSymbol}
+           ~[\%`\,\(\)\[\]$break]+            {TSymbol}
 
 {
 readInteger :: Code -> Integer

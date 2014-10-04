@@ -20,6 +20,8 @@ syntax match eigenPack /`/
 syntax match eigenUnpack /,/
 syntax match eigenOpen /(/
 syntax match eigenClose /)/
+syntax match eigenDualOpen /\[/
+syntax match eigenDualClose /\]/
 " syntax match eigenSymbol /[^%`,()\t\n\v\f\r ]\+/
 syntax match eigenInteger /[+-]\?\d\+/
 syntax match eigenNothing /()/
@@ -30,6 +32,7 @@ syntax match eigenModule /<->/
 syntax region eigenCommentLine start=/% / end=/$/ oneline contains=eigenTodo
 syntax region eigenCommentGroup start=/%(/ end=/)/ fold contains=eigenCommentGroup
 syntax region eigenGroup start=/(/ end=/)/ fold contains=ALL
+syntax region eigenDualGroup start=/\[/ end=/\]/ fold contains=ALL
 syntax region eigenCharacter start=/[%`,()\t\n\v\f\r ]'/hs=s+1 skip=/\\./ end=/'/
 syntax region eigenString start=/[%`,()\t\n\v\f\r ]"/hs=s+1 skip=/\\./ end=/"/
 
@@ -39,6 +42,8 @@ highlight link eigenCommentSymbol Comment
 highlight link eigenCommentGroup  Comment
 highlight link eigenOpen          Special
 highlight link eigenClose         Special
+highlight link eigenDualOpen      Structure
+highlight link eigenDualClose     Structure
 highlight link eigenPack          Structure
 highlight link eigenUnpack        Structure
 " highlight link eigenGroup         Special

@@ -11,6 +11,8 @@ import Common (Expression (..), Structure (..), Token (..))
        UNPACK    {TUnpack}
        OPEN      {TOpen}
        CLOSE     {TClose}
+       DUALOPEN  {TDualOpen}
+       DUALCLOSE {TDualClose}
        SYMBOL    {TSymbol $$}
        --
        INTEGER   {TInteger $$}
@@ -24,35 +26,31 @@ import Common (Expression (..), Structure (..), Token (..))
 %%
 
 program :: {Structure}
-        : something {$1}
+        : maybepieces {$1}
 
 piece : COMMENT piece {SComment}
-      | PACK unpiece  {SPair (SSymbol "`") $2}
+      | PACK piece    {SPair (SSymbol "`") $2}
+      | UNPACK piece  {SPair (SSymbol ",") $2}
       | group         {$1}
+      | dualgroup     {$1}
       | value         {$1}
       | SYMBOL        {SSymbol $1}
 
-unpiece : COMMENT unpiece {SComment}
-        | UNPACK piece    {SPair (SSymbol ",") $2}
-        | ungroup         {$1}
-        | value           {$1}
-        | SYMBOL          {SSymbol $1}
+group : OPEN maybepieces CLOSE {$2}
 
-group : OPEN something CLOSE {$2}
+dualgroup : DUALOPEN maybedualpieces DUALCLOSE {$2}
 
-ungroup : OPEN unsomething CLOSE {$2}
+maybepieces : {- NOTHING -} {SNothing}
+            | pieces        {$1}
 
-something : {- NOTHING -} {SNothing}
-          | pieces        {$1}
-
-unsomething : {- NOTHING -} {SNothing}
-            | unpieces      {$1}
+maybedualpieces : {- NOTHING -} {SNothing}
+                | dualpieces    {$1}
 
 pieces : piece        {$1}
        | pieces piece {SPair $1 $2}
 
-unpieces : unpiece          {$1}
-         | unpieces unpiece {SPair $1 $2}
+dualpieces : piece            {$1}
+           | piece dualpieces {SPair $1 $2} -- This is dangerous for the stack.
 
 value : INTEGER   {SInteger $1}
       | CHARACTER {SCharacter $1}

@@ -27,9 +27,9 @@ test :: String -> IO ()
 test s = do putChar '\n'
             putStr ("Read:\n" ++ s)
             let t = eigenlex s
-            -- putStrLn ("Tokenized:\n" ++ showWithSpaces t)
+            putStrLn ("Tokenized:\n" ++ showWithSpaces t)
             let e = eigenparse t
-            -- putStrLn ("Parsed:\n" ++ show e)
+            putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
             let x = eigenevaluate e
