@@ -11,10 +11,9 @@ import Common (Expression (..), Structure (..), Token (..))
        UNPACK    {TUnpack}
        OPEN      {TOpen}
        CLOSE     {TClose}
-       DUALOPEN  {TDualOpen}
-       DUALCLOSE {TDualClose}
+       LISTOPEN  {TListOpen}
+       LISTCLOSE {TListClose}
        SYMBOL    {TSymbol $$}
-       --
        INTEGER   {TInteger $$}
        CHARACTER {TCharacter $$}
        STRING    {TString $$}
@@ -28,33 +27,45 @@ import Common (Expression (..), Structure (..), Token (..))
 program :: {Structure}
         : maybepieces {$1}
 
-piece : COMMENT piece {SComment}
-      | PACK piece    {SPair (SSymbol "`") $2}
-      | UNPACK piece  {SPair (SSymbol ",") $2}
-      | group         {$1}
-      | dualgroup     {$1}
-      | value         {$1}
-      | SYMBOL        {SSymbol $1}
-
-group : OPEN maybepieces CLOSE {$2}
-
-dualgroup : DUALOPEN maybedualpieces DUALCLOSE {$2}
-
 maybepieces : {- NOTHING -} {SNothing}
             | pieces        {$1}
-
-maybedualpieces : {- NOTHING -} {SNothing}
-                | dualpieces    {$1}
 
 pieces : piece        {$1}
        | pieces piece {SPair $1 $2}
 
-dualpieces : piece            {$1}
-           | piece dualpieces {SPair $1 $2} -- This is dangerous for the stack.
+piece : COMMENT piece {SComment}
+      | PACK unpiece  {SPack $2} -- This is perhaps deprecated.
+      | list          {$1}
+      | group         {$1}
+      | value         {$1}
+      | SYMBOL        {SSymbol $1}
+
+list : LISTOPEN maybeelements LISTCLOSE {SPack (SList $2)}
+
+maybeelements : {- NOTHING -}       {[]}
+              | piece maybeelements {$1 : $2} -- This is risky for the stack.
+
+group : OPEN maybepieces CLOSE {$2}
 
 value : INTEGER   {SInteger $1}
       | CHARACTER {SCharacter $1}
-      | STRING    {SPair (SSymbol "`") (SString $1)}
+      | STRING    {SPack (SString $1)}
+
+-- The utility of these is questionable.
+
+unpiece : COMMENT unpiece {SComment}
+        | UNPACK piece    {SUnpack $2}
+        | ungroup         {$1}
+        | value           {$1}
+        | SYMBOL          {SSymbol $1}
+
+ungroup : OPEN maybeunpieces CLOSE {$2}
+
+maybeunpieces : {- NOTHING -} {SNothing}
+              | unpieces      {$1}
+
+unpieces : unpiece          {$1}
+         | unpieces unpiece {SPair $1 $2}
 
 {
 eigenfail :: [Token] -> a
@@ -66,11 +77,14 @@ eigenparse = eigenexpress . eigenstructure
 
 eigenexpress :: Structure -> Expression
 eigenexpress SComment = ENothing
+eigenexpress (SPack x) = EPair (ESymbol "`") (eigenexpress x)
+eigenexpress (SUnpack x) = EPair (ESymbol ",") (eigenexpress x)
 eigenexpress (SPair SComment SComment) = ENothing
 eigenexpress (SPair SComment y) = eigenexpress y
 eigenexpress (SPair x SComment) = eigenexpress x
 eigenexpress (SPair x y) = EPair (eigenexpress x) (eigenexpress y)
 eigenexpress (SSymbol x) = ESymbol x
+eigenexpress (SList x) = foldr (EPair . eigenexpress) ENothing x
 eigenexpress SNothing = ENothing
 eigenexpress (SInteger x) = EInteger x
 eigenexpress (SCharacter x) = ECharacter x

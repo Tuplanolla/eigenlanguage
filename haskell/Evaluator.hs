@@ -64,8 +64,8 @@ systemEnv = fromList [("-", liftInteger2 (-)),
                       ("always", liftAlways),
                       ("if", liftIf),
                       ("<", liftIntegerPredicate (<)),
-                      ("most", liftMost),
-                      ("last", liftLast),
+                      ("head", liftHead),
+                      ("tail", liftTail),
                       ("evaluate", liftEvaluate),
                       ("io", EEffect (EUnique <$> newIORef True)),
                       ("print-character", liftPC putChar)]
@@ -94,12 +94,12 @@ liftAlways = EFunction (\ x -> EFunction (\ y -> x))
 liftEvaluate :: Expression
 liftEvaluate = EFunction eigenevaluate
 
-liftMost :: Expression
-liftMost = let f (EPair x y) = x in
+liftHead :: Expression
+liftHead = let f (EPair x y) = x in
                EFunction f
 
-liftLast :: Expression
-liftLast = let f (EPair x y) = y in
+liftTail :: Expression
+liftTail = let f (EPair x y) = y in
                EFunction f
 
 -- The rest is automatically generated.

@@ -22,7 +22,10 @@ data Expression = EPair Expression Expression
                 deriving Show
 
 data Structure = SComment
+               | SPack Structure
+               | SUnpack Structure
                | SPair Structure Structure
+               | SList [Structure]
                | SSymbol Name
                | SNothing
                | SInteger Integer
@@ -35,8 +38,8 @@ data Token = TComment
            | TUnpack
            | TOpen
            | TClose
-           | TDualOpen
-           | TDualClose
+           | TListOpen
+           | TListClose
            | TSymbol Name
            | TInteger Integer
            | TCharacter Char
