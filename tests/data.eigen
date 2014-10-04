@@ -4,4 +4,4 @@
 % type: expression
 % expected: 3
 
-length `(2 3 4)
+length [2 [3 4] 5]

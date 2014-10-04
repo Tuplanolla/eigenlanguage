@@ -32,6 +32,9 @@ test s = do putChar '\n'
             putStrLn ("Parsed:\n" ++ show e)
             let f = eigenformat e
             putStrLn ("Formatted:\n" ++ f)
+            putStr "Colorized:\n"
+            eigenformatIO e
+            putStrLn ""
             let x = eigenevaluate e
             putStrLn ("Evaluated:\n" ++ show x)
             case x of

@@ -15,14 +15,14 @@ syntax keyword eigenTodo contained containedin=eigenLine TODO
 
 " This parser should be treated with suspicion.
 
-syntax match eigenCommentSymbol /%[^%`,()\t\n\v\f\r ]\+/
+syntax match eigenCommentSymbol /%[^%`,()\[\]\t\n\v\f\r ]\+/
 syntax match eigenPack /`/
 syntax match eigenUnpack /,/
 syntax match eigenOpen /(/
 syntax match eigenClose /)/
 syntax match eigenDualOpen /\[/
 syntax match eigenDualClose /\]/
-" syntax match eigenSymbol /[^%`,()\t\n\v\f\r ]\+/
+" syntax match eigenSymbol /[^%`,()\[\]\t\n\v\f\r ]\+/
 syntax match eigenInteger /[+-]\?\d\+/
 syntax match eigenNothing /()/
 syntax match eigenFunction /->/
@@ -33,8 +33,8 @@ syntax region eigenCommentLine start=/% / end=/$/ oneline contains=eigenTodo
 syntax region eigenCommentGroup start=/%(/ end=/)/ fold contains=eigenCommentGroup
 syntax region eigenGroup start=/(/ end=/)/ fold contains=ALL
 syntax region eigenDualGroup start=/\[/ end=/\]/ fold contains=ALL
-syntax region eigenCharacter start=/[%`,()\t\n\v\f\r ]'/hs=s+1 skip=/\\./ end=/'/
-syntax region eigenString start=/[%`,()\t\n\v\f\r ]"/hs=s+1 skip=/\\./ end=/"/
+syntax region eigenCharacter start=/[%`,()\[\]\t\n\v\f\r ]'/hs=s+1 skip=/\\./ end=/'/
+syntax region eigenString start=/[%`,()\[\]\t\n\v\f\r ]"/hs=s+1 skip=/\\./ end=/"/
 
 highlight link eigenTodo          Todo
 highlight link eigenCommentLine   Comment
@@ -57,3 +57,9 @@ highlight link eigenBind          Keyword
 highlight link eigenModule        Keyword
 
 let b:current_syntax = "eigen"
+
+" Indentation does not quite work, but this is close enough.
+
+set lisp
+set expandtab
+set lispwords=
