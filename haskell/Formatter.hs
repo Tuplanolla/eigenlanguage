@@ -5,26 +5,42 @@ import Common (Expression (..))
 import System.Console.ANSI
 
 eigenformatIO :: Expression -> IO ()
-eigenformatIO = formatIO False
+eigenformatIO = formatIO 0 False
 
 -- This entire thing is questionable.
-formatIO :: Bool -> Expression -> IO ()
-formatIO True e @ (EPair _ _) = do with Red "("
-                                   formatIO False e
-                                   with Red ")"
-formatIO _ (EPair x y) = do formatIO False x
-                            with White " "
-                            formatIO True y
-formatIO _ (ESymbol x @ "`") = with Green x
-formatIO _ (ESymbol x @ ",") = with Green x
-formatIO _ (ESymbol x @ "->") = with Yellow x
-formatIO _ (ESymbol x @ "<-") = with Yellow x
-formatIO _ (ESymbol x) = with White x
-formatIO _ ENothing = with Magenta "()"
-formatIO _ (ELogical True) = with Magenta "true"
-formatIO _ (ELogical False) = with Magenta "false"
-formatIO _ (EInteger x) = with Magenta (show x)
-formatIO _ (ECharacter x) = with Blue (show x)
+formatIO :: Int -> Bool -> Expression -> IO ()
+formatIO n _ (EPair (ESymbol "`") x) = unformatIO n True x
+formatIO n True e @ (EPair _ _) = do with Red "("
+                                     formatIO n False e
+                                     with Red ")"
+formatIO n _ (EPair x @ (EPair _ _)
+                    y @ (EPair _ _)) = do formatIO n False x
+                                          with White ('\n' : replicate (n + 3) ' ')
+                                          formatIO (n + 3) True y
+formatIO n _ (EPair x y) = do formatIO n False x
+                              with White " "
+                              formatIO n True y
+formatIO n _ (ESymbol x @ "`") = with Green x
+formatIO n _ (ESymbol x @ ",") = with Green x
+formatIO n _ (ESymbol x @ "->") = with Yellow x
+formatIO n _ (ESymbol x @ "<-") = with Yellow x
+formatIO n _ (ESymbol x) = with White x
+formatIO n _ ENothing = with Magenta "()"
+formatIO n _ (ELogical True) = with Magenta "true"
+formatIO n _ (ELogical False) = with Magenta "false"
+formatIO n _ (EInteger x) = with Magenta (show x)
+formatIO n _ (ECharacter x) = with Blue (show x)
+
+unformatIO :: Int -> Bool -> Expression -> IO ()
+unformatIO n _ (EPair (ESymbol ",") x) = formatIO n True x
+unformatIO n True x @ (EPair _ _) = do with Green "["
+                                       unformatIO n False x
+                                       with Green "]"
+unformatIO n _ (EPair x ENothing) = unformatIO n False x
+unformatIO n _ (EPair x y) = do unformatIO n False x
+                                with White " "
+                                unformatIO n False y
+unformatIO n p x = formatIO n p x
 
 with :: Color -> String -> IO ()
 with c x = do setSGR [SetColor Foreground Vivid c,
@@ -59,7 +75,7 @@ format _ (EBind x y) = show x ++ " " ++ show y
 format _ (EArray x) = show x
 
 unformat :: Bool -> Expression -> String
-unformat _ (EPair (ESymbol ",") x) = "," ++ format True x
+unformat _ (EPair (ESymbol ",") x) = format True x
 unformat True x @ (EPair _ _) = "[" ++ unformat False x ++ "]"
 unformat _ (EPair x ENothing) = unformat False x
 unformat _ (EPair x y) = unformat False x ++ " " ++ unformat False y
