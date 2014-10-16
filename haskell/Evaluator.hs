@@ -26,7 +26,7 @@ evaluate e (EPair (EPair (ESymbol "->")
          = let f v = evaluate e (EPair (EPair (ESymbol "->") x)
                                        (EBind (singleton k v) y)) in
                EFunction f -- Fold here instead?
-evaluate e (EPair (EPair (ESymbol "<-") b) x) = evaluate e (EBind (fold b) x)
+evaluate e (EPair (EPair (ESymbol "=") b) x) = evaluate e (EBind (fold b) x)
 evaluate e (EPair x y) = apply (evaluate e x) (evaluate e y)
 evaluate e (ESymbol k) = fetch e k (lookup k e)
 evaluate e (EFunction f) = EFunction (evaluate e . f)

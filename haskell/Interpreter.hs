@@ -17,7 +17,7 @@ loop :: IO ()
 loop = do putStrLn "Eigenlanguage Interpreter 0.0.0/2014-09-28 (approximately)"
           putStrLn $ "Write code using " ++
            (intercalate ", " . map fst . toList $ systemEnv)
-           ++ ", <-, ->, #, #1, #2, ... (Enter to flush and Ctrl D to stop) or cancel (Ctrl C anywhere)."
+           ++ ", = ->, #, #1, #2, ... (Enter to flush and Ctrl D to stop) or cancel (Ctrl C anywhere)."
           loopWith (1, empty)
                    (0, []) -- User experience goes here.
 

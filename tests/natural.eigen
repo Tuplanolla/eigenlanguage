@@ -4,5 +4,5 @@
 % type: expression
 % expected: 0
 
-head (<- (ns (pair 0 (map (+ 1) ns)))
-         ns)
+head (= (ns (pair 0 (map (+ 1) ns)))
+        ns)

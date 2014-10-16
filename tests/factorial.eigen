@@ -4,8 +4,8 @@
 % type: expression
 % expected: 5040
 
-<- (f (-> n
-          (if (< n 3)
-              n
-              (* n (f (- n 1))))))
-   (f 7)
+= (f (-> n
+         (if (< n 3)
+             n
+             (* n (f (- n 1))))))
+  (f 7)

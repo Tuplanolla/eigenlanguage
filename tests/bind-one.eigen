@@ -4,7 +4,7 @@
 % type: expression
 % expected: 24
 
-- (<- (x 2)
-      (* (+ x 3)
-         (+ 4 x)))
+- (= (x 2)
+     (* (+ x 3)
+        (+ 4 x)))
   6

@@ -4,5 +4,5 @@
 % type: expression
 % expected: 4
 
-always 4 (<- (f (-> g (f g)))
-             (f f))
+always 4 (= (f (-> g (f g)))
+            (f f))

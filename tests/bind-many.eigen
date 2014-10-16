@@ -4,8 +4,8 @@
 % type: expression
 % expected: 24
 
-- (<- (x 2
-       y 3)
-      (* (+ x y)
-         (+ 4 x)))
+- (= (x 2
+      y 3)
+     (* (+ x y)
+        (+ 4 x)))
   6

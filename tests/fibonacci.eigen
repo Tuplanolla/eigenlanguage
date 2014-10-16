@@ -4,9 +4,9 @@
 % type: expression
 % expected: 13
 
-<- (f (-> n
-          (if (< n 2)
-              n
-              (+ (f (- n 1))
-                 (f (- n 2))))))
-   (f 7)
+= (f (-> n
+         (if (< n 2)
+             n
+             (+ (f (- n 1))
+                (f (- n 2))))))
+  (f 7)

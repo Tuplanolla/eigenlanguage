@@ -4,8 +4,8 @@
 % type: effect
 % expected: "13"
 
--> io (<- (io'' (<- (io' (print-character '1' io))
-                    (if (< 3 2)
-                        (print-character '2' io')
-                        (print-character '3' io'))))
-          io'')
+-> io (= (io'' (= (io' (print-character '1' io))
+                  (if (< 3 2)
+                      (print-character '2' io')
+                      (print-character '3' io'))))
+         io'')

@@ -4,5 +4,5 @@
 % type: run-error
 % expected: ()
 
--> io (<- (io' (print-character '1' io))
-          (print-character '3' io)) % Not quite an error yet.
+-> io (= (io' (print-character '1' io))
+         (print-character '3' io)) % Not quite an error yet.
