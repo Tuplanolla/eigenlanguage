@@ -1,0 +1,9 @@
+% name: string literal
+% features: constant
+% stage: evaluate
+% type: expression
+% expected: 4
+
+length "t
+w\
+o"
