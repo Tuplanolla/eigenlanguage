@@ -4,27 +4,6 @@ import Common (Expression (..))
 
 import System.Console.ANSI
 
-{-
-Something to put into a separate document:
-
-Pretty printing should convert a parse tree into a form that
-is as readable as possible.
-It features formatting, spacing, indentation and line wrapping.
-Restructuring and spell checking are out of its scope.
-Prettiness or readability is difficult to define, but
-based on the gathered data,
-it seems that pretty code follows certain key points.
-Assuming there is no format to begin with,
-
-* regions without nesting should be separated into paragraphs,
-* long lines should be split,
-* splits should favor special forms and boundaries like ") (",
-* indentation should go by common structures,
-* the effect of name lengths on indentation should be minimized,
-* excessively long indents should be crushed and
-* all-encompassing top level parentheses should be left unindented.
--}
-
 eigenformatIO :: Expression -> IO ()
 eigenformatIO = formatIO 0 False
 
