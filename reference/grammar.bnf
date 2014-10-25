@@ -1,0 +1,101 @@
+% The full syntax is
+
+file : module
+   % | something-else
+
+module : "<->" module-application module-pair-list
+
+module-application : module-name
+                   | "(" module-name module-parameters ")" % some restrictions here
+
+module-name : NAME
+
+module-pair-list : "{" any-module-pairs "}"
+
+module-pair : "->" export-list
+            | "<-" import-list
+            | SYMBOL expression
+
+export-list : "[" any-exports "]"
+
+export : export-application
+       | export-alias
+
+export-application : SYMBOL
+
+export-alias : "(" "=" export-pair-list ")"
+
+export-pair-list : "{" any-export-pairs "}"
+
+export-pair : SYMBOL export-application
+
+import-list : "[" any-imports "]"
+
+import : import-application
+       | import-alias
+
+import-application : import-name
+                   | "(" import-name import-arguments ")" % some restrictions here
+
+import-name : NAME
+
+import-alias : "(" "=" import-pair-list ")"
+
+import-pair-list : "{" any-import-pairs "}"
+
+import-pair : SYMBOL import-application
+
+function : "->" function-list function-body
+
+function-list : function-parameter
+              | function-parameter-list
+
+function-parameter-list : "[" any-function-parameters "]"
+
+function-parameter : SYMBOL
+
+function-body : expression
+
+binding : "=" binding-pair-list binding-body
+
+binding-pair-list : "{" any-binding-pairs "}"
+
+binding-pair : SYMBOL expression
+
+binding-body : expression
+
+expression : "(" many-expressions ")"
+           | "[" many-expressions "]"
+           | value
+           | SYMBOL
+
+value : SINGLETON
+      | INTEGER
+      | CHARACTER
+      | STRING
+
+% where for all x
+
+maybe-x : NOTHING
+        | x
+
+any-x : NOTHING
+      | many-x
+
+% and using left recursion
+
+many-x : x
+       | many-x x
+
+% or right recursion
+
+many-x : x
+       | x many-x
+
+% and typically
+
+x-list : "[" any-x "]"
+
+x-group : "(" x ")"
+
+% .
