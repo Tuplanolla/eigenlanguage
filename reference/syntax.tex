@@ -1,19 +1,24 @@
 \documentclass{article}
 \pagestyle{empty}
 \usepackage{listings, multicol}
+\def\pb{0.176em}
 \lstset{
 aboveskip=0pt,
 belowskip=12pt,
 literate=
+{\{}{{(\kern-\pb[\kern+\pb}} 1
+{\}}{{]\kern-\pb)\kern+\pb}} 1
+{<-}{$\leftarrow$} 1
 {->}{$\rightarrow$} 1
 {=}{$=$} 1
-{<-}{$\leftarrow$} 1
 {<->}{$\leftrightarrow$} 1
 {...}{$\cdots$} 2
-{`}{`} 1
-{'}{'} 1
-{``}{``} 1
-{''}{''} 1
+{`}{${}^{\scriptscriptstyle\backslash}$} 1
+{,}{${}_{\scriptscriptstyle/}$} 1
+{<'}{`} 1
+{'>}{'} 1
+{<"}{``} 1
+{">}{''} 1
 }
 \begin{document}
 \begin{multicols} 2
@@ -21,33 +26,40 @@ literate=
 
 \section*{Primitive Forms}
 
-\subsection*{Singleton}
-\begin{lstlisting}[mathescape]
-()
-\end{lstlisting}
-
 \subsection*{Function Application}
 % f a_1 ...
 \begin{lstlisting}[mathescape]
 $f$ $a_1$ ...
 \end{lstlisting}
 
-\subsection*{Grouping}
+\subsection*{Left-Recursive Group}
 % (x_1 ...)
 \begin{lstlisting}[mathescape]
 ($x_1$ ...)
 \end{lstlisting}
 
-\subsection*{List Construction}
+\subsection*{Right-Recursive Group}
 % [x_1 ...]
 \begin{lstlisting}[mathescape]
 [$x_1$ ...]
 \end{lstlisting}
 
-\subsection*{Function Definition}
-% -> [p_1 ...] z
+\subsection*{Code as Data}
+% `x
 \begin{lstlisting}[mathescape]
--> [$p_1$ ...] $z$
+`$x$
+\end{lstlisting}
+
+\subsection*{Data as Code}
+% ,x
+\begin{lstlisting}[mathescape]
+,$x$
+\end{lstlisting}
+
+\subsection*{Function Definition}
+% -> {p_1 ...} z
+\begin{lstlisting}[mathescape]
+-> {$p_1$ ...} $z$
 \end{lstlisting}
 
 \subsection*{Binding}
@@ -61,34 +73,38 @@ $f$ $a_1$ ...
 \end{lstlisting}
 
 \subsection*{Module Declaration}
-% <-> (m p_1 ...) {
-% -> [e_1
-%     (= [b_2 e_2
+% <-> {m p_1 ...} {
+% -> {e_1
+%     {= {b_2 e_2
 %         b_3 e_3
-%         ... ...])
-%     ...]
-% <- [i_1
-%     (i_2 a_2_1 ...)
-%     (= [c_3 i_3
-%         c_4 (i_4 a_4_1 ...)
-%         ... ...])
-%     ...]
+%         ... ...}
+%      ... ...}
+%     ...}
+% <- {i_1
+%     {i_2 a_2_1 ...}
+%     {= {c_3 i_3
+%         c_4 {i_4 a_4_1 ...}
+%         ... ...}
+%      ... ...}
+%     ...}
 % y_1 x_1
 % ... ...
 % }
 \begin{lstlisting}[mathescape]
-<-> ($m$ $p_1$ ...) {
--> [$e_1$
-   (= [$b_2$ $e_2$
+<-> {$m$ $p_1$ ...} {
+-> {$e_1$
+   {= {$b_2$ $e_2$
        $b_3$ $e_3$
-       ... ...])
-   ...]
-<- [$i_1$
-   ($i_2$ $a_{2, 1}$ ...)
-   (= [$c_3$ $i_3$
-       $c_4$ ($i_4$ $a_{4, 1}$ ...)
-       ... ...])
-   ...]
+       ... ...}
+    ... ...}
+   ...}
+<- {$i_1$
+   {$i_2$ $a_{2, 1}$ ...}
+   {= {$c_3$ $i_3$
+       $c_4$ {$i_4$ $a_{4, 1}$ ...}
+       ... ...}
+    ... ...}
+   ...}
 $y_1$ $x_1$
 ... ...
 }
@@ -98,6 +114,11 @@ $y_1$ $x_1$
 
 \section*{Syntactic Sugar}
 
+\subsection*{Singleton}
+\begin{lstlisting}[mathescape]
+{}
+\end{lstlisting}
+
 \subsection*{Name Qualification}
 % m/y
 \begin{lstlisting}[mathescape]
@@ -106,21 +127,27 @@ $m$/$y$
 
 \subsection*{Number}
 \begin{lstlisting}[mathescape]
-20
++18_12
 \end{lstlisting}
 
 \subsection*{Character}
 % 'T'
 \begin{lstlisting}[mathescape]
-`T'
+<'T'>
 \end{lstlisting}
 
 \subsection*{String}
 % "This text
 % is arbitrary."
 \begin{lstlisting}[mathescape]
-``This text
-is arbitrary.''
+<"This text
+is arbitrary.">
+\end{lstlisting}
+
+\subsection*{External String}
+% <- "arbitrary_file.text"
+\begin{lstlisting}[mathescape]
+<- <"arbitrary_file.text">
 \end{lstlisting}
 
 \subsection*{Syntactic Comment}
@@ -140,18 +167,6 @@ is arbitrary.''
 This text
 is arbitrary.
 %%
-\end{lstlisting}
-
-\subsection*{Code as Data}
-% `x
-\begin{lstlisting}[mathescape]
-${}^{\scriptscriptstyle\backslash}$$x$
-\end{lstlisting}
-
-\subsection*{Data as Code}
-% ,x
-\begin{lstlisting}[mathescape]
-${}_{\scriptscriptstyle/}$$x$
 \end{lstlisting}
 
 \end{multicols}

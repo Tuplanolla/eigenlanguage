@@ -1,14 +1,16 @@
 % The full syntax is
 
 file : module
-   % | something-else
+     | expression
 
-module : "<->" module-application module-pair-list
+module : "<->" module-form module-pair-list
 
-module-application : module-name
-                   | "(" module-name module-parameters ")" % some restrictions here
+module-form : module-name
+            | "{" module-name any-module-parameters "}"
 
 module-name : NAME
+
+module-parameter : SYMBOL
 
 module-pair-list : "{" any-module-pairs "}"
 
@@ -16,41 +18,45 @@ module-pair : "->" export-list
             | "<-" import-list
             | SYMBOL expression
 
-export-list : "[" any-exports "]"
+export-list : "{" any-exports "}"
 
-export : export-application
+export : export-form
        | export-alias
 
-export-application : SYMBOL
+export-form : SYMBOL
 
-export-alias : "(" "=" export-pair-list ")"
+export-alias : "{" "=" export-pair-list "}"
 
 export-pair-list : "{" any-export-pairs "}"
 
-export-pair : SYMBOL export-application
+export-pair : SYMBOL export-form
 
-import-list : "[" any-imports "]"
+import-list : "{" any-imports "}"
 
-import : import-application
-       | import-alias
+import : import-form
+       | import-alias-pair-list
 
-import-application : import-name
-                   | "(" import-name import-arguments ")" % some restrictions here
+import-form : import-name
+            | "{" import-name any-import-arguments "}"
 
 import-name : NAME
 
-import-alias : "(" "=" import-pair-list ")"
+import-argument : expression % perhaps with some restrictions
+
+import-alias-pair-list : "{" any-import-alias-pairs "}"
+
+import-alias-pair : "=" import-pair-list
 
 import-pair-list : "{" any-import-pairs "}"
 
-import-pair : SYMBOL import-application
+import-pair : SYMBOL import-form
 
-function : "->" function-list function-body
+function : "->" function-form function-body
 
-function-list : function-parameter
+function-form : function-parameter
               | function-parameter-list
 
-function-parameter-list : "[" any-function-parameters "]"
+function-parameter-list : "{" any-function-parameters "}"
 
 function-parameter : SYMBOL
 
@@ -66,6 +72,10 @@ binding-body : expression
 
 expression : "(" many-expressions ")"
            | "[" many-expressions "]"
+           | "`" expression
+           | "," expression
+           | "``" expression
+           | ",," expression
            | value
            | SYMBOL
 
@@ -92,10 +102,4 @@ many-x : x
 many-x : x
        | x many-x
 
-% and typically
-
-x-list : "[" any-x "]"
-
-x-group : "(" x ")"
-
-% .
+% depending on the parser.
