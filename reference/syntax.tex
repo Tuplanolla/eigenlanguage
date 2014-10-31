@@ -1,168 +1,210 @@
 \documentclass{article}
 \pagestyle{empty}
+\usepackage[
+margin=0.5in,
+a4paper
+]{geometry}
 \usepackage{listings, multicol}
-\def\pb{0.176em}
 \lstset{
 aboveskip=0pt,
-belowskip=12pt,
 literate=
-{\{}{{(\kern-\pb[\kern+\pb}} 1
-{\}}{{]\kern-\pb)\kern+\pb}} 1
-{<-}{$\leftarrow$} 1
-{->}{$\rightarrow$} 1
 {=}{$=$} 1
-{<->}{$\leftrightarrow$} 1
+{->}{$\rightarrow$} 2
+{<-}{$\leftarrow$} 2
+{<->}{$\longleftrightarrow$} 3
 {...}{$\cdots$} 2
 {`}{${}^{\scriptscriptstyle\backslash}$} 1
 {,}{${}_{\scriptscriptstyle/}$} 1
-{<'}{`} 1
-{'>}{'} 1
-{<"}{``} 1
-{">}{''} 1
+{\#'}{`} 1
+{'\#}{'} 1
+{\#"}{``} 1
+{"\#}{''} 1,
+mathescape
 }
+
 \begin{document}
 \begin{multicols} 2
-[\section*{\huge Syntax of Eigenlanguage}]
+[\section*{\huge Syntax of Eigenlanguage}\hrule]
 
-\section*{Primitive Forms}
-
-\subsection*{Function Application}
-% f a_1 ...
-\begin{lstlisting}[mathescape]
-$f$ $a_1$ ...
+\bigskip\subsection*{Application}
+% f a
+\begin{lstlisting}
+$f$ $a$
 \end{lstlisting}
+Applies the function \lstinline{$f$} to its argument \lstinline{$a$}.
 
-\subsection*{Left-Recursive Group}
+\bigskip\subsection*{Singleton}
+\begin{lstlisting}
+()
+\end{lstlisting}
+Represents the only value of a unit type.
+
+\bigskip\subsection*{Left-Recursive Group}
 % (x_1 ...)
-\begin{lstlisting}[mathescape]
+\begin{lstlisting}
 ($x_1$ ...)
 \end{lstlisting}
+Builds pairs of expressions \lstinline{$x$} from right to left.
+For example \lstinline{($x_1$ $x_2$ $x_3$)}
+yields the code \lstinline{((() $x_1$) $x_2$) $x_3$}.
 
-\subsection*{Right-Recursive Group}
+\bigskip\subsection*{Right-Recursive Group}
 % [x_1 ...]
-\begin{lstlisting}[mathescape]
+\begin{lstlisting}
 [$x_1$ ...]
 \end{lstlisting}
+Builds pairs of expressions \lstinline{$x$} from left to right.
+For example \lstinline{[$x_1$ $x_2$ $x_3$]}
+yields the code \lstinline{$x_1$ ($x_2$ ($x_3$ ()))}.
 
-\subsection*{Code as Data}
+\bigskip\subsection*{Code as Data}
 % `x
-\begin{lstlisting}[mathescape]
+\begin{lstlisting}
 `$x$
 \end{lstlisting}
+Treats the expression \lstinline{$x$} as a value.
+Works recursively if repeated.
+For example \lstinline{`($x_1$ ($f$ $a_1$ $a_2$) $x_3$)}
+produces the data \lstinline{($x_1$ $y$ $x_3$)}.
 
-\subsection*{Data as Code}
+\bigskip\subsection*{Data as Code}
 % ,x
-\begin{lstlisting}[mathescape]
+\begin{lstlisting}
 ,$x$
 \end{lstlisting}
+Treats the value \lstinline{$x$} as an expression.
+For example \lstinline{``($x_1$ ,($f$ $a_1$ $a_2$) $x_3$)}
+produces the data \lstinline{($x_1$ $y$ $x_3$)}.
 
-\subsection*{Function Definition}
-% -> {p_1 ...} z
-\begin{lstlisting}[mathescape]
--> {$p_1$ ...} $z$
-\end{lstlisting}
-
-\subsection*{Binding}
-% = {y_1 x_1
-%    ... ...}
+\bigskip\subsection*{Binding}
+% = (y_1 x_1
+%    ... ...)
 %   z
-\begin{lstlisting}[mathescape]
-= {$y_1$ $x_1$
-   ... ...}
+\begin{lstlisting}
+= ($y_1$ $x_1$
+   ... ...)
   $z$
 \end{lstlisting}
+Binds symbols \lstinline{$y$} to expressions \lstinline{$x$}
+inside expression \lstinline{$z$} and every \lstinline{$x$}.
 
-\subsection*{Module Declaration}
-% <-> {m p_1 ...} {
-% -> {e_1
-%     {= {b_2 e_2
-%         b_3 e_3
-%         ... ...}
-%      ... ...}
-%     ...}
-% <- {i_1
-%     {i_2 a_2_1 ...}
-%     {= {c_3 i_3
-%         c_4 {i_4 a_4_1 ...}
-%         ... ...}
-%      ... ...}
-%     ...}
-% y_1 x_1
-% ... ...
-% }
-\begin{lstlisting}[mathescape]
-<-> {$m$ $p_1$ ...} {
--> {$e_1$
-   {= {$b_2$ $e_2$
-       $b_3$ $e_3$
-       ... ...}
-    ... ...}
-   ...}
-<- {$i_1$
-   {$i_2$ $a_{2, 1}$ ...}
-   {= {$c_3$ $i_3$
-       $c_4$ {$i_4$ $a_{4, 1}$ ...}
-       ... ...}
-    ... ...}
-   ...}
-$y_1$ $x_1$
-... ...
-}
+\bigskip\subsection*{Function}
+% -> p z
+\begin{lstlisting}
+-> $p$ $z$
 \end{lstlisting}
+Defines an anonymous function
+and binds its parameter \lstinline{$p$} to its argument
+inside \lstinline{$z$}.
+
+\bigskip\subsection*{Nested Functions}
+% -> (p_1 ...) z
+\begin{lstlisting}
+-> ($p_1$ ...) $z$
+\end{lstlisting}
+Defines an anonymous function and
+binds its parameters \lstinline{$p$} to its arguments inside \lstinline{$z$}.
+For example \lstinline{-> ($p_1$ $p_2$ $p_3$) $z$}
+is equivalent to \lstinline{-> $p_1$ (-> $p_2$ (-> $p_3$ $z$))}.
+
+\bigskip\subsection*{Name Qualification}
+% m/e
+\begin{lstlisting}
+$m$/$e$
+\end{lstlisting}
+Resolves to the exported symbol \lstinline{$e$} from module \lstinline{$m$}.
 
 \columnbreak
 
-\section*{Syntactic Sugar}
-
-\subsection*{Singleton}
-\begin{lstlisting}[mathescape]
-{}
+\bigskip\subsection*{Module}
+% <-> (m p_1 ...) (
+% -> (e_1
+%     (= (b_2 e_2
+%         b_3 e_3
+%         ... ...)
+%      ... ...)
+%     ...)
+% <- (i_1
+%     (i_2 a_2_1 ...)
+%     (= (c_3 i_3
+%         c_4 (i_4 a_4_1 ...)
+%         ... ...)
+%      ... ...)
+%     ...)
+% y_1 x_1
+% ... ...
+% )
+\begin{lstlisting}
+<-> ($m$ $p_1$ ...) (
+-> ($e_1$
+    (= ($b_2$ $e_2$
+        $b_3$ $e_3$
+        ... ...)
+     ... ...)
+    ...)
+<- ($i_1$
+    ($i_2$ $a_{2, 1}$ ...)
+    (= ($c_3$ $i_3$
+        $c_4$ ($i_4$ $a_{4, 1}$ ...)
+        ... ...)
+     ... ...)
+    ...)
+$y_1$ $x_1$
+... ...
+)
 \end{lstlisting}
+Declares the module \lstinline{$m$} with parameters \lstinline{$p$}.
+Exports symbols \lstinline{$e$},
+imports modules \lstinline{$i$} and
+binds symbols \lstinline{$y$} to expressions \lstinline{$x$}
+inside every \lstinline{$e$}, every \lstinline{$a$} and every \lstinline{$x$}.
+Gives some exports \lstinline{$e$} aliases \lstinline{$b$},
+some imports \lstinline{$i$} aliases \lstinline{$c$} and
+some imports \lstinline{$i$} arguments \lstinline{$a$}.
 
-\subsection*{Name Qualification}
-% m/y
-\begin{lstlisting}[mathescape]
-$m$/$y$
-\end{lstlisting}
-
-\subsection*{Number}
-\begin{lstlisting}[mathescape]
+\bigskip\subsection*{Number}
+\begin{lstlisting}
 +18_12
 \end{lstlisting}
+Represents the number $20$, which
+is $18$ in base $12$.
 
-\subsection*{Character}
+\bigskip\subsection*{Character}
 % 'T'
-\begin{lstlisting}[mathescape]
-<'T'>
+\begin{lstlisting}
+#'T'#
 \end{lstlisting}
+Is the $20$th character of the alphabet.
 
-\subsection*{String}
+\bigskip\subsection*{String}
 % "This text
 % is arbitrary."
-\begin{lstlisting}[mathescape]
-<"This text
-is arbitrary.">
+\begin{lstlisting}
+#"This text
+is arbitrary."#
 \end{lstlisting}
+Contains text with escape sequences.
 
-\subsection*{External String}
+\bigskip\subsection*{External String}
 % <- "arbitrary_file.text"
-\begin{lstlisting}[mathescape]
-<- <"arbitrary_file.text">
+\begin{lstlisting}
+<- #"arbitrary_file.text"#
+\end{lstlisting}
+Reads a file that contains text without escape sequences.
+
+\bigskip\subsection*{Syntactic Comment}
+% %arbitrary-expression
+\begin{lstlisting}
+%arbitrary-expression
 \end{lstlisting}
 
-\subsection*{Syntactic Comment}
-% %x
-\begin{lstlisting}[mathescape]
-%$x$
-\end{lstlisting}
-
-\subsection*{Line Comment}
-\begin{lstlisting}[mathescape]
+\bigskip\subsection*{Line Comment}
+\begin{lstlisting}
 % This text is arbitrary.
 \end{lstlisting}
 
-\subsection*{Block Comment}
-\begin{lstlisting}[mathescape]
+\bigskip\subsection*{Block Comment}
+\begin{lstlisting}
 %%
 This text
 is arbitrary.

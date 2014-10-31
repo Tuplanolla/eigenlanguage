@@ -1,7 +1,17 @@
 % The full syntax is
 
-file : module
-     | expression
+program : expression
+
+expression : module
+           | function
+           | binding
+           | "`" expression
+           | "," expression
+           | "``" expression
+           | ",," expression
+           | expression expression
+           | value
+           | SYMBOL
 
 module : "<->" module-form module-pair-list
 
@@ -69,15 +79,6 @@ binding-pair-list : "{" any-binding-pairs "}"
 binding-pair : SYMBOL expression
 
 binding-body : expression
-
-expression : "(" many-expressions ")"
-           | "[" many-expressions "]"
-           | "`" expression
-           | "," expression
-           | "``" expression
-           | ",," expression
-           | value
-           | SYMBOL
 
 value : SINGLETON
       | INTEGER
