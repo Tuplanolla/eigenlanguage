@@ -1,7 +1,7 @@
 % name: data definition
-% features: arithmetic data
+% features: data
 % stage: evaluate
 % type: expression
 % expected: 3
 
-length [2 [3 4] 5]
+length ``[2 [3 4] 5]

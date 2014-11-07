@@ -1,56 +1,58 @@
-module Common (Code, Environment, Expression (..), Name, Structure (..),
-               Token (..)) where
+module Common (Code, Environment, Expression (..), Name, Structure (..)) where
 
 import Data.Array (Array)
 import Data.IORef (IORef)
 import Data.Map (Map)
-import Prelude (Bool, Char, Integer, IO, Show, String)
+import Prelude (Bool, Char, Integer, IO, Maybe, Show, String)
+import System.IO (FilePath)
 
 import Hack ()
 
-data Expression = EPair Expression Expression
-                | ESymbol Name
+data Expression = ESymbol Name
+                | EPair Expression Expression
                 | ENothing
-                | ELogical Bool
-                | EInteger Integer
-                | ECharacter Char
+                | EBinding Environment Expression
                 | EFunction (Expression -> Expression)
-                | EBind Environment Expression
+                | EModule Name -- Something more here.
                 | EEffect (IO Expression)
                 | EUnique (IORef Bool)
                 | EArray (Array Integer Expression) -- listArray (1, 0) []
+                | ELogical Bool
+                | EInteger Integer
+                | ECharacter Char
+                | EExternal FilePath
+                | ESyntacticComment Code
+                | EFreeComment Code
+                | ETag Tag Expression
                 deriving Show
 
-data Structure = SComment
-               | SPack Structure
-               | SUnpack Structure
-               | SPair Structure Structure
-               | SList [Structure]
-               | SSymbol Name
-               | SNothing
-               | SInteger Integer
-               | SCharacter Char
-               | SString String
+data Tag = TRecursive Direction -- EPair
+         | TArity Integer       -- EFunction
+         | TOrder [Symbol]      -- EBinding
+         | TRadix Integer       -- EInteger
+         | TContinuous Bool     -- EPair for EStrings
+         | TComment Span        -- EFreeComment
+         | TLine Integer
+         | TColumn Integer
+         | TIndentation Integer
+         deriving Show
+
+data Direction = DLeft
+               | DRight
                deriving Show
 
-data Token = TComment
-           | TPack
-           | TUnpack
-           | TOpen
-           | TClose
-           | TListOpen
-           | TListClose
-           | TSymbol Name
-           | TInteger Integer
-           | TCharacter Char
-           | TString String
-           deriving Show
+data Span = SLine
+          | SBlock
+          deriving Show
 
--- type Environment = [(Name, Expression)]
-type Environment = Map Name Expression
+-- type Environment = [(Symbol, Expression)]
+type Environment = Map Symbol Expression
 
--- type Name = Text
-type Name = String
+-- type Symbol = String
+type Symbol = Text
 
--- type Code = Text
-type Code = String
+-- type Name = String
+type Name = Text
+
+-- type Code = String
+type Code = Text

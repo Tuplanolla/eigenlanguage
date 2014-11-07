@@ -16,48 +16,48 @@ expression : module
 module : "<->" module-form module-pair-list
 
 module-form : module-name
-            | "{" module-name any-module-parameters "}"
+            | "(" module-name any-module-parameters ")"
 
 module-name : NAME
 
 module-parameter : SYMBOL
 
-module-pair-list : "{" any-module-pairs "}"
+module-pair-list : "(" any-module-pairs ")"
 
 module-pair : "->" export-list
             | "<-" import-list
             | SYMBOL expression
 
-export-list : "{" any-exports "}"
+export-list : "(" any-exports ")"
 
 export : export-form
        | export-alias
 
 export-form : SYMBOL
 
-export-alias : "{" "=" export-pair-list "}"
+export-alias : "(" "=" export-pair-list ")"
 
-export-pair-list : "{" any-export-pairs "}"
+export-pair-list : "(" any-export-pairs ")"
 
 export-pair : SYMBOL export-form
 
-import-list : "{" any-imports "}"
+import-list : "(" any-imports ")"
 
 import : import-form
        | import-alias-pair-list
 
 import-form : import-name
-            | "{" import-name any-import-arguments "}"
+            | "(" import-name any-import-arguments ")"
 
 import-name : NAME
 
 import-argument : expression % perhaps with some restrictions
 
-import-alias-pair-list : "{" any-import-alias-pairs "}"
+import-alias-pair-list : "(" any-import-alias-pairs ")"
 
 import-alias-pair : "=" import-pair-list
 
-import-pair-list : "{" any-import-pairs "}"
+import-pair-list : "(" any-import-pairs ")"
 
 import-pair : SYMBOL import-form
 
@@ -66,7 +66,7 @@ function : "->" function-form function-body
 function-form : function-parameter
               | function-parameter-list
 
-function-parameter-list : "{" any-function-parameters "}"
+function-parameter-list : "(" any-function-parameters ")"
 
 function-parameter : SYMBOL
 
@@ -74,7 +74,7 @@ function-body : expression
 
 binding : "=" binding-pair-list binding-body
 
-binding-pair-list : "{" any-binding-pairs "}"
+binding-pair-list : "(" any-binding-pairs ")"
 
 binding-pair : SYMBOL expression
 
