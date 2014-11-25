@@ -2,7 +2,7 @@ module Interpreter where
 
 import Data.Text
 
-import Common
+import Data
 import Evaluator
 
 interpret :: Text -> Expression

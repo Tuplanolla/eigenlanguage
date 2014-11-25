@@ -4,31 +4,21 @@ import Data.Text
 import Data.Text.IO
 import Prelude hiding (putStr)
 import System.Console.ANSI
+import System.IO
 
-import Common
+import Data
 
-{-
-Some ideas on representing concrete syntax trees.
-One needs to take the abstract bullshit and
-tag it with indentation, line breaking and color.
--}
+tag :: Expression -> Expression
+tag = undefined
 
-type AList a b = [(a, b)]
+format :: Expression -> String
+format = undefined
 
-data Augmented a b = APart a b APart
-                   | AEnd
-                   deriving Show
+display :: Expression -> IO ()
+display = undefined
 
-data Colored a = CPart Color a CPart
-               | CEnd
-               deriving Show
-
-data Indented a = IPart Integer a IPart
-                | IEnd
-                deriving Show
-
-present :: Expression -> Presentation
-present = undefined
+hDisplay :: Handle -> Expression -> IO ()
+hDisplay = undefined
 
 {-
 color :: Piece -> Color

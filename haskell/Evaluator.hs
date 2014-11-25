@@ -2,7 +2,7 @@ module Evaluator where
 
 import Data.Map
 
-import Common
+import Data
 
 evaluate :: Expression -> Expression
 evaluate = evaluateWith empty

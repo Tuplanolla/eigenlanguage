@@ -19,8 +19,7 @@ help = do n <- getProgName
 test :: FilePath -> IO ()
 test fp = do p <- readFile fp
              let x = interpret p
-             let f = present x
-             putPresentation f
+             display x
 
 main :: IO ()
 main = do as <- getArgs
