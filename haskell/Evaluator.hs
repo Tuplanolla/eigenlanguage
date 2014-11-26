@@ -4,8 +4,8 @@ import Data.Map
 
 import Data
 
-evaluate :: Expression -> Expression
+evaluate :: Expression -> Either Failure Expression
 evaluate = evaluateWith empty
 
-evaluateWith :: Environment -> Expression -> Expression
+evaluateWith :: Environment -> Expression -> Either Failure Expression
 evaluateWith = undefined

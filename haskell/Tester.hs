@@ -2,10 +2,13 @@ module Tester where
 
 import Control.Applicative
 import Control.Monad
+import Data.Functor
 import Data.Maybe
 import Data.Text
 import Data.Text.IO (readFile)
-import Prelude hiding (readFile)
+import Data.Traversable
+import Data.Traversable.Instances
+import Prelude hiding (readFile, traverse)
 import System.Environment
 import System.IO.Error
 
@@ -19,7 +22,8 @@ help = do n <- getProgName
 test :: FilePath -> IO ()
 test fp = do p <- readFile fp
              let x = interpret p
-             display x
+             sequenceA $ put <$> x
+             return ()
 
 main :: IO ()
 main = do as <- getArgs

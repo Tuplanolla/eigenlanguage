@@ -8,17 +8,25 @@ import System.IO
 
 import Data
 
-tag :: Expression -> Expression
-tag = undefined
+-- | Manages color tags.
+highlight :: Expression -> Expression
+highlight = id
 
-format :: Expression -> String
-format = undefined
+-- | Manages space and indentation tags.
+format :: Expression -> Expression
+format = id
 
-display :: Expression -> IO ()
+-- | Converts an expression into a plain string.
+display :: Expression -> String
 display = undefined
 
-hDisplay :: Handle -> Expression -> IO ()
-hDisplay = undefined
+-- | Displays an expression in rainbow colors.
+put :: Expression -> IO ()
+put = hPut stdout
+
+-- | Displays an expression in rainbow colors by using some handle.
+hPut :: Handle -> Expression -> IO ()
+hPut = undefined
 
 {-
 color :: Piece -> Color

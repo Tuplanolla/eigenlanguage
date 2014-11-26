@@ -5,5 +5,5 @@ import Data.Text
 import Data
 import Evaluator
 
-interpret :: Text -> Expression
+interpret :: Text -> Either Failure Expression
 interpret = undefined

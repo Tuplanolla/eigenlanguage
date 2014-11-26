@@ -1,5 +1,5 @@
 -- | Useful instances.
-module Help () where
+module Instances () where
 
 import Data.IORef (IORef)
 import Prelude (IO, Show, const, show)

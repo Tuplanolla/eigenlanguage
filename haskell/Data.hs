@@ -8,7 +8,7 @@ import Data.Text (Text)
 import Prelude (Bool, Char, Int, Integer, IO, Show, String)
 import System.IO (FilePath)
 
-import Help ()
+import Instances ()
 
 {- |
 Syntax with an asymmetric diagram.
@@ -142,6 +142,60 @@ data Color = CNeutral
            | CYellow
            -- ^ Antiblue.
            deriving Show
+
+-- | Things that ruin everything.
+data Failure = FFuck -- There will surely be a million.
+             deriving Show
+
+-- | Things that annoy the programmer.
+data Warning = WIntent IntentWarning
+             | WStyle StyleWarning
+             deriving Show
+
+-- | Bad ideas.
+data IntentWarning = EmptySomething -- Function, binding, ...
+                   | DuplicateImport
+                   | DuplicateExport
+                   | RepeatedAlias
+                   | RepeatedAliases
+                   | DeadCode
+                   | SingleUseLocal
+                   | Deprecated
+                   | StrangeType
+                   | StupidIdea
+                   deriving Show
+
+-- In addition to provoking warnings, the compiler should suggest trivial fixes.
+-- These are just some ideas for common style problems.
+-- | Bad ways to express ideas.
+data StyleWarning = SpaceAfterLeftParenthesis
+                  | SpaceBeforeRightParenthesis
+                  | SpaceAfterLeftBracket
+                  | SpaceBeforeRightBracket
+                  | LinebreakAfterOrBeforeWhatever
+                  | LeadingSpacesInComment -- ?
+                  | TrailingSpaces
+                  | TwoSpaces
+                  | ThreeLinebreaks
+                  | NoParagraphLinebreaks
+                  | BrokenParagraph
+                  | IncorrectIndentation
+                  | MixedIndentation
+                  | TooManyRows
+                  | TooManyColumns
+                  | EmptyComment
+                  | DubiousName -- Such as uRgH?.
+                  | RidiculousName -- Such as f2(x&-'.
+                  | KindOfBadName -- Such as convention_breaking.
+                  | NoAlphabeticalOrder -- Sounds dumb.
+                  | NoOrderByDependence
+                  | NoModulesInFile
+                  | MultipleModulesInFile
+                  | ReservedName -- For a brighter future!
+                  | ExtraParentheses
+                  | ExtraBrackets
+                  | NoDocumentation
+                  deriving Show
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.
 type Environment = Map Symbol Expression
