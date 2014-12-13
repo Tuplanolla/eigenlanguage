@@ -144,57 +144,66 @@ data Color = CNeutral
            deriving Show
 
 -- | Things that ruin everything.
-data Failure = FFuck -- There will surely be a million.
+data Failure = FParse ParseFailure
+             | FEvaluation EvaluationFailure
              deriving Show
+
+-- | Problems with grammar.
+data ParseFailure = PFFuckedUp
+                  deriving Show
+
+-- | Uncaught runtime exceptions.
+data EvaluationFailure = EFFuckedUp -- There will surely be a million.
+                       deriving Show
 
 -- | Things that annoy the programmer.
 data Warning = WIntent IntentWarning
-             | WStyle StyleWarning
+             | WStyle StyleWarning -- and row, column
              deriving Show
 
 -- | Bad ideas.
-data IntentWarning = EmptySomething -- Function, binding, ...
-                   | DuplicateImport
-                   | DuplicateExport
-                   | RepeatedAlias
-                   | RepeatedAliases
-                   | DeadCode
-                   | SingleUseLocal
-                   | Deprecated
-                   | StrangeType
-                   | StupidIdea
+data IntentWarning = IWEmptySomething -- Function, binding, ...
+                   | IWDuplicateImport
+                   | IWDuplicateExport
+                   | IWRepeatedAlias
+                   | IWRepeatedAliases
+                   | IWDeadCode
+                   | IWSingleUseLocal
+                   | IWDeprecated
+                   | IWStrangeType
+                   | IWStupidIdea
                    deriving Show
 
 -- In addition to provoking warnings, the compiler should suggest trivial fixes.
 -- These are just some ideas for common style problems.
 -- | Bad ways to express ideas.
-data StyleWarning = SpaceAfterLeftParenthesis
-                  | SpaceBeforeRightParenthesis
-                  | SpaceAfterLeftBracket
-                  | SpaceBeforeRightBracket
-                  | LinebreakAfterOrBeforeWhatever
-                  | LeadingSpacesInComment -- ?
-                  | TrailingSpaces
-                  | TwoSpaces
-                  | ThreeLinebreaks
-                  | NoParagraphLinebreaks
-                  | BrokenParagraph
-                  | IncorrectIndentation
-                  | MixedIndentation
-                  | TooManyRows
-                  | TooManyColumns
-                  | EmptyComment
-                  | DubiousName -- Such as uRgH?.
-                  | RidiculousName -- Such as f2(x&-'.
-                  | KindOfBadName -- Such as convention_breaking.
-                  | NoAlphabeticalOrder -- Sounds dumb.
-                  | NoOrderByDependence
-                  | NoModulesInFile
-                  | MultipleModulesInFile
-                  | ReservedName -- For a brighter future!
-                  | ExtraParentheses
-                  | ExtraBrackets
-                  | NoDocumentation
+data StyleWarning = SWSpaceAfterLeftParenthesis
+                  | SWSpaceBeforeRightParenthesis
+                  | SWSpaceAfterLeftBracket
+                  | SWSpaceBeforeRightBracket
+                  | SWLinebreakAfterOrBeforeWhatever
+                  | SWLeadingSpacesInComment -- ?
+                  | SWTrailingSpaces
+                  | SWTwoSpaces
+                  | SWThreeLinebreaks
+                  | SWNoParagraphLinebreaks
+                  | SWBrokenParagraph
+                  | SWIncorrectIndentation
+                  | SWMixedIndentation
+                  | SWTooManyRows
+                  | SWTooManyColumns
+                  | SWEmptyComment
+                  | SWDubiousName -- Such as uRgH?.
+                  | SWRidiculousName -- Such as f2(x&-'.
+                  | SWKindOfBadName -- Such as convention_breaking.
+                  | SWNoAlphabeticalOrder -- Sounds dumb.
+                  | SWNoOrderByDependence
+                  | SWNoModulesInFile
+                  | SWMultipleModulesInFile
+                  | SWReservedName -- For a brighter future!
+                  | SWExtraParentheses
+                  | SWExtraBrackets
+                  | SWNoDocumentation
                   deriving Show
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.
