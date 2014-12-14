@@ -5,11 +5,11 @@ program : expression
 expression : module
            | function
            | binding
-           | "`" expression
-           | "," expression
-           | "``" expression
-           | ",," expression
-           | expression expression
+           | some-data
+           | some-code
+           | more-data
+           | more-code
+           | group
            | value
            | SYMBOL
 
@@ -79,6 +79,16 @@ binding-pair-list : "(" any-binding-pairs ")"
 binding-pair : SYMBOL expression
 
 binding-body : expression
+
+some-data : "`" expression
+
+some-code : "," expression
+
+more-data : "``" expression
+
+more-code : ",," expression
+
+group : "(" any-expressions ")"
 
 value : SINGLETON
       | INTEGER

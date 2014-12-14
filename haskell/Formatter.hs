@@ -1,5 +1,6 @@
 module Formatter where
 
+import Data.Functor
 import Data.Text
 import Data.Text.IO
 import Prelude hiding (putStr)
@@ -7,6 +8,11 @@ import System.Console.ANSI
 import System.IO
 
 import Data
+
+-- | Removes metadata.
+untag :: Expression -> Expression
+untag (ETag _ x) = untag x
+untag x = untag <$$> x
 
 -- | Manages color tags.
 highlight :: Expression -> Expression

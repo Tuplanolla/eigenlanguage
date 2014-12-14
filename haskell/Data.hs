@@ -2,13 +2,36 @@
 module Data where
 
 import Data.Array (Array)
+import Data.Functor ((<$>))
 import Data.IORef (IORef)
 import Data.Map (Map)
-import Data.Text (Text)
+import Data.Text.Lazy (Text)
 import Prelude (Bool, Char, Int, Integer, IO, Show, String)
 import System.IO (FilePath)
 
 import Instances ()
+
+-- | Essentially @\<$\>@ for @Expression@.
+(<$$>) :: (Expression -> Expression) -> Expression -> Expression
+f <$$> x @ (ESymbol _) = x
+f <$$> EPair x y = EPair (f x) (f y)
+f <$$> x @ ESingleton = x
+f <$$> ESomeData x = ESomeData (f x)
+f <$$> ESomeCode x = ESomeCode (f x)
+f <$$> EMoreData x = EMoreData (f x)
+f <$$> EMoreCode x = EMoreCode (f x)
+f <$$> EEquality e x = EEquality e (f x)
+f <$$> ERightArrow g = ERightArrow (f <$> g)
+f <$$> x @ ELeftArrow = x
+f <$$> EModule n x = EModule n (f x)
+f <$$> x @ (EQualification _ _) = x
+f <$$> x @ (EEffect _) = x -- ?
+f <$$> x @ (EUnique _) = x
+f <$$> EArray x = EArray (f <$> x)
+f <$$> x @ (ELogical _) = x
+f <$$> x @ (EInteger _) = x
+f <$$> x @ (ECharacter _) = x
+f <$$> ETag t x = ETag t (f x)
 
 {- |
 Syntax with an asymmetric diagram.
@@ -37,8 +60,10 @@ data Expression = ESymbol Symbol
                 | EPair Expression Expression
                 -- ^ Function application and group construction.
                 | ESingleton
-                | EData Expression
-                | ECode Expression
+                | ESomeData Expression
+                | ESomeCode Expression
+                | EMoreData Expression
+                | EMoreCode Expression
                 | EEquality Environment Expression
                 -- ^ Binding and aliasing.
                 | ERightArrow (Expression -> Expression)
