@@ -5,7 +5,7 @@ import Data.Array (Array)
 import Data.IORef (IORef)
 import Data.Map (Map)
 import Data.Text.Lazy (Text)
-import Prelude (Bool, Char, Int, Integer, IO, Show, String)
+import Prelude (Bool, Char, Eq, Int, Integer, IO, Show, String)
 import System.IO (FilePath)
 
 import Instances ()
@@ -25,10 +25,10 @@ data Lexeme = LLeftOpen
             | LSymbol Code
             | LSpace Nat
             | LLineBreak Nat
-            | LInteger Nat
+            | LInteger Integer
             | LCharacter Char
             | LString String
-            deriving Show
+            deriving (Eq, Show)
 
 {- |
 Syntax with an asymmetric diagram.
@@ -77,7 +77,11 @@ data Expression = ESymbol Symbol
                 | ELogical Bool
                 | EInteger Integer
                 | ECharacter Char
+                | ESyntacticComment Expression
+                | EBlockComment Code
+                | ELineComment Code
                 | ETag Tag Expression
+                | ENothing
                 deriving Show
 
 {- |
@@ -105,14 +109,11 @@ data Tag = TDirection Direction
          -- ^ The base of a numeric literal.
          | TIndentation Depth
          -- ^ A heuristic for the way a line is indented.
-         | TSyntacticComment Code
-         | TBlockComment Comment
-         | TLineComment Comment
          | TFilePath FilePath
          | TLineNumber Nat
          | TColumnNumber Nat
          | TColor Color
-         deriving Show
+         deriving (Eq, Show)
 
 {- |
 Recursive directions with a symmetric diagram.
@@ -123,7 +124,7 @@ L - R
 -}
 data Direction = DLeft
                | DRight
-               deriving Show
+               deriving (Eq, Show)
 
 {- |
 Depth with a symmetric diagram.
@@ -139,7 +140,7 @@ data Depth = Fixed Nat
            | Flexible Nat
            -- ^ Tabs.
            | Mixed
-           deriving Show
+           deriving (Eq, Show)
 
 {- |
 Colors with a symmetric diagram.
@@ -163,25 +164,25 @@ data Color = CNeutral
            -- ^ Antigreen.
            | CYellow
            -- ^ Antiblue.
-           deriving Show
+           deriving (Eq, Show)
 
 -- | Things that ruin everything.
 data Failure = FParse ParseFailure
              | FEvaluation EvaluationFailure
-             deriving Show
+             deriving (Eq, Show)
 
 -- | Problems with grammar.
 data ParseFailure = PFFuckedUp
-                  deriving Show
+                  deriving (Eq, Show)
 
 -- | Uncaught runtime exceptions.
 data EvaluationFailure = EFFuckedUp -- There will surely be a million.
-                       deriving Show
+                       deriving (Eq, Show)
 
 -- | Things that annoy the programmer.
 data Warning = WIntent IntentWarning
              | WStyle StyleWarning -- and row, column
-             deriving Show
+             deriving (Eq, Show)
 
 -- | Bad ideas.
 data IntentWarning = IWEmptySomething -- Function, binding, ...
@@ -194,7 +195,7 @@ data IntentWarning = IWEmptySomething -- Function, binding, ...
                    | IWDeprecated
                    | IWStrangeType
                    | IWStupidIdea
-                   deriving Show
+                   deriving (Eq, Show)
 
 -- In addition to provoking warnings, the compiler should suggest trivial fixes.
 -- These are just some ideas for common style problems.
@@ -226,18 +227,15 @@ data StyleWarning = SWSpaceAfterLeftParenthesis
                   | SWExtraParentheses
                   | SWExtraBrackets
                   | SWNoDocumentation
-                  deriving Show
+                  deriving (Eq, Show)
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.
 type Environment = Map Symbol Expression
 
--- | Nearly unrestricted, for comments.
-type Comment = Text
-
--- | Somewhat restricted, for source code.
+-- | Nearly unrestricted, for source code.
 type Code = Text
 
--- | Quite restricted, for symbol names.
+-- | Somewhat restricted, for symbol names.
 type Symbol = Text
 
 -- | Very restricted, for module names.

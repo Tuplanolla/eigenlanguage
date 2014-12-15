@@ -15,6 +15,7 @@ import System.IO.Error
 import Formatter
 -- import Interpreter
 import Lexer
+import Parser
 import Data
 
 help :: IO ()
@@ -23,8 +24,10 @@ help = do n <- getProgName
 
 test :: FilePath -> IO ()
 test fp = do p <- readFile fp
-             let x = lex p
              putStrLn fp
+             let l = lex p
+             -- print l
+             let x = parse <$> l
              print x
 {-
              let x = interpret p

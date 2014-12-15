@@ -4,7 +4,6 @@
 module Parser where
 
 import Control.Applicative ((<$>), (<*>), (*>), (<*), (<$), pure)
-import Data.Char
 import Data.Map
 import Data.Monoid
 import Data.Text.Lazy hiding (singleton)
@@ -12,13 +11,10 @@ import Prelude hiding (lex)
 import Text.Parsec hiding (parse)
 import Text.Parsec.Prim hiding (parse)
 import Text.Parsec.Pos
-import Text.Parsec.Text.Lazy
 
 import Data
 import Formatter -- No.
 import Lexer
-
-type ExpressionParser = Parsec [Lexeme] ({- State -}) Expression
 
 ($>) :: Functor f => f a -> b -> f b
 ($>) = flip (<$)
@@ -31,59 +27,79 @@ tagPos sp = ETag (TFilePath (sourceName sp))
 
 -- And now for some trash that does not compile...
 
+{-
 parse :: [Lexeme] -> Either ParseFailure Expression
 parse t = case runParser program () mempty t of
                Left _ -> Left PFFuckedUp -- Hides implementation details poorly.
                Right x -> Right x
+-}
+parse = runParser program () mempty
 
 rawParse :: Text -> Either ParseError Expression
 rawParse t = runParser program () mempty =<< lex t
+
+type ExpressionParser = Parsec [Lexeme] ({- State -}) Expression
 
 program :: ExpressionParser
 program = anyLeft expression
 
 expression :: ExpressionParser
-expression = nothing
-         <|> leftGroup
-         <|> rightGroup
-         <|> datum
-         <|> code
-         <|> try value
-         <|> try symbol
-         <?> "expression"
+expression = leftGroup
+             <|> rightGroup
+             <|> datum
+             <|> code
+             <|> value
+             <|> symbol
+             <?> "expression"
 
 leftGroup :: ExpressionParser
-leftGroup = char '(' *> anyLeft expression <* char ')'
+leftGroup = the LLeftOpen *> anyLeft expression <* the LLeftClose
 
 rightGroup :: ExpressionParser
-rightGroup = char '[' *> anyRight expression <* char ']'
+rightGroup = the LRightOpen *> anyRight expression <* the LRightClose
 
 datum :: ExpressionParser
-datum = char '`' *> (ESomeData <$> expression)
+datum = the LData *> (ESomeData <$> expression)
 
 code :: ExpressionParser
-code = char ',' *> (ESomeCode <$> expression)
-
-moreData :: ExpressionParser
-moreData = fail "undefined"
-
-moreCode :: ExpressionParser
-moreCode = fail "undefined"
+code = the LCode *> (ESomeCode <$> expression)
 
 nodule :: ExpressionParser
 nodule = fail "undefined"
 
 value :: ExpressionParser
-value = fail "undefined"
+value = EInteger . getInteger <$> thePrim isInteger
+        <|> ECharacter . getCharacter <$> thePrim isCharacter
 
 symbol :: ExpressionParser
-symbol = undefined
+symbol = ESymbol . getSymbol <$> thePrim isSymbol
 
-nothing :: ExpressionParser
-nothing = eof $> ESingleton
+getSymbol (LSymbol s) = s
+getInteger (LInteger x) = x
+getCharacter (LCharacter c) = c
+getString (LString s) = s
 
-invisible :: ExpressionParser
-invisible = oneOf "\a\b\t\n\v\f\r " $> undefined
+isSymbol (LSymbol _) = True
+isSymbol _ = False
+isInteger (LInteger _) = True
+isInteger _ = False
+isCharacter (LCharacter _) = True
+isCharacter _ = False
+isComment (LBlockComment _) = True
+isComment (LLineComment _) = True
+isComment _ = False
+
+-- the :: Lexeme -> Parser Lexeme
+-- the l = satisfy (== l) <?> show (l :: Lexeme)
+
+the :: (Show a, Eq a) => a -> Parsec [a] () a
+the x = thePrim (== x)
+
+thePrim :: Show a => (a -> Bool) -> Parsec [a] () a
+thePrim f = let g x | f x = Just x
+                    | otherwise = Nothing
+                h n _ _ = incSourceColumn n 1 in
+                tokenPrim show h g
 
 -- Works.
 -- runParser (anyRight (ESymbol . pack <$> string "f")) (initialPos "") "" "ffff"
