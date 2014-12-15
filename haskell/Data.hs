@@ -2,7 +2,6 @@
 module Data where
 
 import Data.Array (Array)
-import Data.Functor ((<$>))
 import Data.IORef (IORef)
 import Data.Map (Map)
 import Data.Text.Lazy (Text)
@@ -11,27 +10,25 @@ import System.IO (FilePath)
 
 import Instances ()
 
--- | Essentially @\<$\>@ for @Expression@.
-(<$$>) :: (Expression -> Expression) -> Expression -> Expression
-f <$$> x @ (ESymbol _) = x
-f <$$> EPair x y = EPair (f x) (f y)
-f <$$> x @ ESingleton = x
-f <$$> ESomeData x = ESomeData (f x)
-f <$$> ESomeCode x = ESomeCode (f x)
-f <$$> EMoreData x = EMoreData (f x)
-f <$$> EMoreCode x = EMoreCode (f x)
-f <$$> EEquality e x = EEquality e (f x)
-f <$$> ERightArrow g = ERightArrow (f <$> g)
-f <$$> x @ ELeftArrow = x
-f <$$> EModule n x = EModule n (f x)
-f <$$> x @ (EQualification _ _) = x
-f <$$> x @ (EEffect _) = x -- ?
-f <$$> x @ (EUnique _) = x
-f <$$> EArray x = EArray (f <$> x)
-f <$$> x @ (ELogical _) = x
-f <$$> x @ (EInteger _) = x
-f <$$> x @ (ECharacter _) = x
-f <$$> ETag t x = ETag t (f x)
+{- |
+Syntax in pieces.
+-}
+data Lexeme = LLeftOpen
+            | LLeftClose
+            | LRightOpen
+            | LRightClose
+            | LData
+            | LCode
+            | LComment
+            | LLineComment Code
+            | LBlockComment Code
+            | LSymbol Code
+            | LSpace Nat
+            | LLineBreak Nat
+            | LInteger Nat
+            | LCharacter Char
+            | LString String
+            deriving Show
 
 {- |
 Syntax with an asymmetric diagram.

@@ -8,6 +8,7 @@ import System.Console.ANSI
 import System.IO
 
 import Data
+import Functions
 
 -- | Removes metadata.
 untag :: Expression -> Expression
