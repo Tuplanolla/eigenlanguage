@@ -5,54 +5,25 @@ import Data.Array (Array)
 import Data.IORef (IORef)
 import Data.Map (Map)
 import Data.Text.Lazy (Text)
+-- import Data.Tree (Tree)
 import Prelude (Bool, Char, Eq, Int, Integer, IO, Show, String)
 import System.IO (FilePath)
 
-import Instances ()
+import IO ()
 
-{- |
-Syntax in pieces.
--}
-data Lexeme = LLeftOpen
-            | LLeftClose
-            | LRightOpen
-            | LRightClose
-            | LData
-            | LCode
-            | LComment
-            | LLineComment Code
-            | LBlockComment Code
-            | LSymbol Code
-            | LSpace Nat
-            | LLineBreak Nat
-            | LInteger Integer
-            | LCharacter Char
-            | LString String
+-- There are two syntax trees: parse level and evaluation level.
+-- Perhaps later one even needs a compilation level tree.
+-- This structure underlies all of them.
+
+data Tree a = TElement a
+            | TPair (Tree a) (Tree a)
             deriving (Eq, Show)
 
-{- |
-Syntax with an asymmetric diagram.
+data Parse = PSymbol Symbol
+           | PSingleton
+           | PTag Tag
+           deriving (Eq, Show)
 
-@
-          S
-
-          A
-          |
-  P ----- S ----- L
- / \     / \     / \
-D - C   E - U   I - C
-
-          E
-         / \
-      R A - L A
-         \ /
-          M
-          |
-          Q
-
-          T
-@
--}
 data Expression = ESymbol Symbol
                 | EPair Expression Expression
                 -- ^ Function application and group construction.
@@ -84,19 +55,6 @@ data Expression = ESymbol Symbol
                 | ENothing
                 deriving Show
 
-{- |
-Syntax augmentations with an asymmetric diagram.
-
-@
-D   C   A   O   R   I
-
-S   C - B   C - L   C
-
-F   P - L   N - C   N
-
-          C
-@
--}
 data Tag = TDirection Direction
          -- ^ Whether a pair is built from parentheses or brackets.
          | TContinuous Bool

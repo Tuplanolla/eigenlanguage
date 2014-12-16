@@ -11,6 +11,23 @@ import Text.Parsec.Text.Lazy
 
 import Data
 
+data Lexeme = LLeftOpen
+            | LLeftClose
+            | LRightOpen
+            | LRightClose
+            | LData
+            | LCode
+            | LComment
+            | LLineComment Code
+            | LBlockComment Code
+            | LSymbol Code
+            | LSpace Nat
+            | LLineBreak Nat
+            | LInteger Integer
+            | LCharacter Char
+            | LString String
+            deriving (Eq, Show)
+
 lex :: Code -> Either ParseError [Lexeme]
 lex = runParser (many lexeme) () mempty
 

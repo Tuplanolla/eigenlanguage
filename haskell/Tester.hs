@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Tester where
 
 import Control.Applicative
@@ -5,10 +7,10 @@ import Control.Monad
 import Data.Functor
 import Data.Maybe
 import Data.Text.Lazy
-import Data.Text.Lazy.IO (readFile)
+import Data.Text.Lazy.IO (readFile, putStr)
 import Data.Traversable
 import Data.Traversable.Instances
-import Prelude hiding (lex, readFile, traverse)
+import Prelude hiding (concat, lex, putStr, readFile, traverse)
 import System.Environment
 import System.IO.Error
 
@@ -20,14 +22,15 @@ import Data
 
 help :: IO ()
 help = do n <- getProgName
-          putStrLn $ "Usage: " ++ n ++ " [file] [...]"
+          putStrLn ("Usage: " ++ n ++ " [file] [...]")
 
 test :: FilePath -> IO ()
-test fp = do p <- readFile fp
+test fp = do t <- readFile fp
              putStrLn fp
-             let l = lex p
-             -- print l
-             let x = parse <$> l
+             let _ : ps = splitOn "\n\n" t -- Wrong; shitty libraries are to blame.
+             let p = intercalate " " ps
+             print p
+             let x = rawParse p
              print x
 {-
              let x = interpret p
