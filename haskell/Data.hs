@@ -124,67 +124,75 @@ data Color = CNeutral
            -- ^ Antiblue.
            deriving (Eq, Show)
 
--- | Things that ruin everything.
-data Failure = FParse ParseFailure
-             | FEvaluation EvaluationFailure
+-- | Location of an error or a warning.
+data Location a = LLocation FilePath Nat Nat a
+                deriving (Eq, Show)
+
+data Problem = PError Error
+             | PWarning Warning
              deriving (Eq, Show)
 
+-- | Things that ruin everything.
+data Error = EParse ParseError
+           | EEvaluation EvaluationError
+           deriving (Eq, Show)
+
 -- | Problems with grammar.
-data ParseFailure = PFFuckedUp
-                  deriving (Eq, Show)
+data ParseError = PFFuckedUp
+                deriving (Eq, Show)
 
 -- | Uncaught runtime exceptions.
-data EvaluationFailure = EFFuckedUp -- There will surely be a million.
-                       deriving (Eq, Show)
+data EvaluationError = EFFuckedUp -- There will surely be a million.
+                     deriving (Eq, Show)
 
 -- | Things that annoy the programmer.
-data Warning = WIntent IntentWarning
-             | WStyle StyleWarning -- and row, column
+data Warning = WEvaluation EvaluationWarning
+             | WParse ParseWarning -- and row, column
              deriving (Eq, Show)
 
 -- | Bad ideas.
-data IntentWarning = IWEmptySomething -- Function, binding, ...
-                   | IWDuplicateImport
-                   | IWDuplicateExport
-                   | IWRepeatedAlias
-                   | IWRepeatedAliases
-                   | IWDeadCode
-                   | IWSingleUseLocal
-                   | IWDeprecated
-                   | IWStrangeType
-                   | IWStupidIdea
-                   deriving (Eq, Show)
+data EvaluationWarning = EWEmptySomething -- Function, binding, ...
+                       | EWDuplicateImport
+                       | EWDuplicateExport
+                       | EWRepeatedAlias
+                       | EWRepeatedAliases
+                       | EWDeadCode
+                       | EWSingleUseLocal
+                       | EWDeprecated
+                       | EWStrangeType
+                       | EWStupidIdea
+                       deriving (Eq, Show)
 
 -- In addition to provoking warnings, the compiler should suggest trivial fixes.
 -- These are just some ideas for common style problems.
 -- | Bad ways to express ideas.
-data StyleWarning = SWSpaceAfterLeftParenthesis
-                  | SWSpaceBeforeRightParenthesis
-                  | SWSpaceAfterLeftBracket
-                  | SWSpaceBeforeRightBracket
-                  | SWLinebreakAfterOrBeforeWhatever
-                  | SWLeadingSpacesInComment -- ?
-                  | SWTrailingSpaces
-                  | SWTwoSpaces
-                  | SWThreeLinebreaks
-                  | SWNoParagraphLinebreaks
-                  | SWBrokenParagraph
-                  | SWIncorrectIndentation
-                  | SWMixedIndentation
-                  | SWTooManyRows
-                  | SWTooManyColumns
-                  | SWEmptyComment
-                  | SWDubiousName -- Such as uRgH?.
-                  | SWRidiculousName -- Such as f2(x&-'.
-                  | SWKindOfBadName -- Such as convention_breaking.
-                  | SWNoAlphabeticalOrder -- Sounds dumb.
-                  | SWNoOrderByDependence
-                  | SWNoModulesInFile
-                  | SWMultipleModulesInFile
-                  | SWReservedName -- For a brighter future!
-                  | SWExtraParentheses
-                  | SWExtraBrackets
-                  | SWNoDocumentation
+data ParseWarning = PWSpaceAfterLeftParenthesis
+                  | PWSpaceBeforeRightParenthesis
+                  | PWSpaceAfterLeftBracket
+                  | PWSpaceBeforeRightBracket
+                  | PWLinebreakAfterOrBeforeWhatever
+                  | PWLeadingSpacesInComment -- ?
+                  | PWTrailingSpaces
+                  | PWTwoSpaces
+                  | PWThreeLinebreaks
+                  | PWNoParagraphLinebreaks
+                  | PWBrokenParagraph
+                  | PWIncorrectIndentation
+                  | PWMixedIndentation
+                  | PWTooManyRows
+                  | PWTooManyColumns
+                  | PWEmptyComment
+                  | PWDubiousName -- Such as uRgH?.
+                  | PWRidiculousName -- Such as f2(x&-'.
+                  | PWKindOfBadName -- Such as convention_breaking.
+                  | PWNoAlphabeticalOrder -- Sounds dumb.
+                  | PWNoOrderByDependence
+                  | PWNoModulesInFile
+                  | PWMultipleModulesInFile
+                  | PWReservedName -- For a brighter future!
+                  | PWExtraParentheses
+                  | PWExtraBrackets
+                  | PWNoDocumentation
                   deriving (Eq, Show)
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.
