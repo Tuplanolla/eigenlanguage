@@ -34,33 +34,31 @@ parseCode t = case runParser program Data.Sequence.empty "<interactive>" t of
                    Right x -> Right x
 
 rawParse :: Code -> Either ParseError (ParserState, Tree Parse)
-rawParse = runParser (withState program) Data.Sequence.empty "<interactive>" . strip
+rawParse = runParser (withState program) Data.Sequence.empty "<interactive>"
 
 withState p = flip (,) <$> p <*> getState
 
 mediumParse :: StatefulParser (Tree Parse) -> Code -> Either ParseError (Tree Parse)
-mediumParse p = runParser p Data.Sequence.empty "<interactive>" . strip
+mediumParse p = runParser p Data.Sequence.empty "<interactive>"
 
 program :: StatefulParser (Tree Parse)
-program = group foldl
+program = group foldl <* eof
 
 expression :: StatefulParser (Tree Parse)
 expression = between (char '(') (char ')') (group foldl)
              <|> between (char '[') (char ']') (group foldr)
-             <|> (getPosition >>= warn . testGen) *> (TElement <$> try symbol)
+             <|> {- warnHere PWDubiousName *> -} (TElement <$> try symbol)
 
-testWarning :: Location Warning
-testWarning = LLocation "symbol" 0 0 (WParse PWDubiousName)
-
-testGen :: SourcePos -> Location Warning
-testGen p = LLocation (sourceName p) (sourceLine p) (sourceColumn p) (WParse PWDubiousName)
+warnHere :: ParseWarning -> StatefulParser ()
+warnHere w = getPosition >>= warn . f
+ where f p = LLocation (sourceName p) (sourceLine p) (sourceColumn p) (WParse w)
 
 warn :: Location Warning -> StatefulParser ()
 warn = modifyState . flip (|>)
 
 group f = join between (many invisible)
           (f TPair (TElement PSingleton)
-           <$> sepBy expression (many1 invisible))
+           <$> sepEndBy expression (many1 invisible))
 
 invisible :: StatefulParser Char
 invisible = oneOf " \n\r"

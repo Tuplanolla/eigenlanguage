@@ -9,7 +9,7 @@ import Text.Parsec.Pos
 import Text.Parsec.Prim
 import Text.Parsec.Text.Lazy
 
-import Data
+import Data hiding (ParseError)
 
 data Lexeme = LLeftOpen
             | LLeftClose
