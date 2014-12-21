@@ -12,8 +12,7 @@ import Functions
 
 -- | Removes metadata.
 untag :: Expression -> Expression
-untag (ETag _ x) = untag x
-untag x = untag <$$> x
+untag = id
 
 -- | Manages color tags.
 highlight :: Expression -> Expression

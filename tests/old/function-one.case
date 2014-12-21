@@ -1,0 +1,5 @@
+name: function definition
+features: arithmetic function
+stage: evaluate
+type: expression
+expected: 5

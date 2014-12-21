@@ -1,0 +1,5 @@
+name: counter
+features: arithmetic bind function if recursion tail-recursion
+stage: evaluate
+type: expression
+expected: 0

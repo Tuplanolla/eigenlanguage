@@ -1,7 +1,0 @@
-% name: literal integer
-% features: constant
-% stage: evaluate
-% type: expression
-% expected: 13
-
-13

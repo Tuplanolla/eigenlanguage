@@ -1,7 +1,0 @@
-% name: data evaluation
-% features: arithmetic data evaluate
-% stage: evaluate
-% type: expression
-% expected: 9
-
-- (evaluate `(* 2 ,(+ 3 4))) 5

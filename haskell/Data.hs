@@ -6,7 +6,7 @@ import Data.IORef (IORef)
 import Data.Map (Map)
 import Data.Text.Lazy (Text)
 -- import Data.Tree (Tree)
-import Prelude (Bool, Char, Eq, Int, Integer, IO, Show, String)
+import Prelude (Bool, Char, Eq, Int, Integer, IO, Read, Show, String)
 import System.IO (FilePath)
 
 import IO ()
@@ -16,17 +16,17 @@ import IO ()
 -- This structure underlies all of them.
 
 data Tree a = TElement a
+            -- ^ Anything else.
             | TPair (Tree a) (Tree a)
-            deriving (Eq, Show)
+            -- ^ Function application and group construction.
+            deriving (Eq, Read, Show)
 
 data Parse = PSymbol Symbol
            | PSingleton
            | PTag Tag
-           deriving (Eq, Show)
+           deriving (Eq, Read, Show)
 
 data Expression = ESymbol Symbol
-                | EPair Expression Expression
-                -- ^ Function application and group construction.
                 | ESingleton
                 | ESomeData Expression
                 | ESomeCode Expression
@@ -71,7 +71,7 @@ data Tag = TDirection Direction
          | TLineNumber Nat
          | TColumnNumber Nat
          | TColor Color
-         deriving (Eq, Show)
+         deriving (Eq, Read, Show)
 
 {- |
 Recursive directions with a symmetric diagram.
@@ -82,7 +82,7 @@ L - R
 -}
 data Direction = DLeft
                | DRight
-               deriving (Eq, Show)
+               deriving (Eq, Read, Show)
 
 {- |
 Depth with a symmetric diagram.
@@ -98,7 +98,7 @@ data Depth = Fixed Nat
            | Flexible Nat
            -- ^ Tabs.
            | Mixed
-           deriving (Eq, Show)
+           deriving (Eq, Read, Show)
 
 {- |
 Colors with a symmetric diagram.
@@ -122,33 +122,33 @@ data Color = CNeutral
            -- ^ Antigreen.
            | CYellow
            -- ^ Antiblue.
-           deriving (Eq, Show)
+           deriving (Eq, Read, Show)
 
 -- | Location of an error or a warning.
 data Location a = LLocation FilePath Nat Nat a
-                deriving (Eq, Show)
+                deriving (Eq, Read, Show)
 
 data Problem = PError Error
              | PWarning Warning
-             deriving (Eq, Show)
+             deriving (Eq, Read, Show)
 
 -- | Things that ruin everything.
 data Error = EParse ParseError
            | EEvaluation EvaluationError
-           deriving (Eq, Show)
+           deriving (Eq, Read, Show)
 
 -- | Problems with grammar.
 data ParseError = PFFuckedUp
-                deriving (Eq, Show)
+                deriving (Eq, Read, Show)
 
 -- | Uncaught runtime exceptions.
 data EvaluationError = EFFuckedUp -- There will surely be a million.
-                     deriving (Eq, Show)
+                     deriving (Eq, Read, Show)
 
 -- | Things that annoy the programmer.
 data Warning = WEvaluation EvaluationWarning
              | WParse ParseWarning -- and row, column
-             deriving (Eq, Show)
+             deriving (Eq, Read, Show)
 
 -- | Bad ideas.
 data EvaluationWarning = EWEmptySomething -- Function, binding, ...
@@ -161,7 +161,7 @@ data EvaluationWarning = EWEmptySomething -- Function, binding, ...
                        | EWDeprecated
                        | EWStrangeType
                        | EWStupidIdea
-                       deriving (Eq, Show)
+                       deriving (Eq, Read, Show)
 
 -- In addition to provoking warnings, the compiler should suggest trivial fixes.
 -- These are just some ideas for common style problems.
@@ -193,7 +193,7 @@ data ParseWarning = PWSpaceAfterLeftParenthesis
                   | PWExtraParentheses
                   | PWExtraBrackets
                   | PWNoDocumentation
-                  deriving (Eq, Show)
+                  deriving (Eq, Read, Show)
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.
 type Environment = Map Symbol Expression

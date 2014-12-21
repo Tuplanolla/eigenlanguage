@@ -1,0 +1,5 @@
+name: very lazy evaluation
+features: arithmetic bind function lazy
+stage: evaluate
+type: expression
+expected: 4

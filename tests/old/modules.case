@@ -1,0 +1,5 @@
+name: modules
+features: module
+stage: evaluate
+type: expression
+expected: true

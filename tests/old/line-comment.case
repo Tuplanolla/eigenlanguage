@@ -1,0 +1,5 @@
+name: line comment
+features: arithmetic comment
+stage: evaluate
+type: expression
+expected: 39

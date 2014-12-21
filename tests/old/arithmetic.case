@@ -1,0 +1,5 @@
+name: basic arithmetic
+features: arithmetic
+stage: evaluate
+type: expression
+expected: 39

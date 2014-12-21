@@ -1,0 +1,1 @@
+-> io (print-character '3' (print-character '1' io))

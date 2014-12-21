@@ -17,7 +17,6 @@ instance Applicative Tree where
          TPair f g <*> x = TPair (f <*> x) (g <*> x)
 
 instance Monad Tree where
-         return = TElement
+         return = pure
          TElement x >>= f = f x
          TPair x y >>= f = TPair (x >>= f) (y >>= f)
-

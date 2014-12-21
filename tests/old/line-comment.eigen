@@ -1,0 +1,4 @@
+- (* (+ 2 3) % This is a comment.
+     (+ 4 5))% This another comment.
+% % This is a comment that features unmatched parentheses. :)
+  6

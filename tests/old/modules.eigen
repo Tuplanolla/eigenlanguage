@@ -1,0 +1,42 @@
+% Needs more thought.
+
+% % Here we have module m with x = 2 and f(y) = 4 y.
+% (export m
+%         (f (-> y (* y (+ x 2)))
+%          x 2))
+% 
+% % Here we have another module m' with parametrized y and f(z) = z (y + z).
+% (export (m' t)
+%         (g (-> z (* z (+ y t)))
+%          y t))
+% 
+% % Here we use the module m.
+% % (import (m)
+% %         [(f 3) x]) % Expecting [12 2].
+% 
+% % Here we use two modules with constant parameters to define another one.
+% (import (m (m' 2)) % Here import is at top level, so it is static and fast.
+%         (export (m'')
+%                 v [(f 3) x
+%                    (g 3) y]))
+% 
+% % Here we define a module that relies on another module with varying parameters.
+% (export (m''')
+%         z 2 % This could be user input.
+%         w (import (m (m' z)) % Here importing is dynamic.
+%                   [(f 3) x
+%                    (g 3) y]))
+% 
+% % Here is finally something to test.
+% (import (m'' m''')
+%         (and (== v [12 2 12 2])
+%              (== w [12 2 12 2])))
+% 
+% % With namespaces perhaps...
+% % (export (m' t)
+% %         (f (-> y (* y (+ x t)))
+% %          x t))
+% % (import ((as a m) % This is bad syntax, but just to convey the idea...
+% %          (as b (m' 2)))
+% %         (+ (a/f 2)
+% %            (b/f 3)))

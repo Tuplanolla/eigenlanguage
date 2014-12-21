@@ -1,0 +1,5 @@
+name: lots of parentheses
+features: arithmetic
+stage: evaluate
+type: expression
+expected: 39

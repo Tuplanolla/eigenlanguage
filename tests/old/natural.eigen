@@ -1,0 +1,2 @@
+head (= (ns (pair 0 (map (+ 1) ns)))
+        ns)

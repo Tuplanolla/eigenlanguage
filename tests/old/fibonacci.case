@@ -1,0 +1,5 @@
+name: Fibonacci numbers
+features: arithmetic bind function if recursion tree-recursion
+stage: evaluate
+type: expression
+expected: 13

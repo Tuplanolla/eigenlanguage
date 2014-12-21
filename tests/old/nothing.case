@@ -1,0 +1,5 @@
+name: literal nothing
+features: constant nothing
+stage: evaluate
+type: expression
+expected: ()

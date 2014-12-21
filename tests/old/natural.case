@@ -1,0 +1,5 @@
+name: natural numbers
+features: arithmetic bind data function recursion
+stage: evaluate
+type: expression
+expected: 0

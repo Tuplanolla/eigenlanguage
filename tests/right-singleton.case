@@ -1,0 +1,3 @@
+name: right-recursive singleton (brackets)
+file: right-singleton.eigen
+parsed: TElement PSingleton

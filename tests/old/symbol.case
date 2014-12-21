@@ -1,0 +1,5 @@
+name: simple data defitinion
+features: constant data
+stage: evaluate
+type: expression
+expected: 13

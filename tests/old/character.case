@@ -1,0 +1,5 @@
+name: character literal
+features: constant
+stage: evaluate
+type: expression
+expected: 'c'

@@ -1,0 +1,5 @@
+name: complicated output
+features: arithmetic bind function if io
+stage: evaluate
+type: effect
+expected: "13"

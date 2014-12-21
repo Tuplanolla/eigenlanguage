@@ -1,0 +1,3 @@
+name: left-recursive singleton (parentheses)
+file: left-singleton.eigen
+parsed: TElement PSingleton

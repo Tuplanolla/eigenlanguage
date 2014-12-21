@@ -1,0 +1,5 @@
+name: recursively bound variables
+features: arithmetic bind recursion
+stage: evaluate
+type: expression
+expected: 42

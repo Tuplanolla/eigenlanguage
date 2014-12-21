@@ -1,0 +1,3 @@
+name: empty file with one line (0a)
+file: empty-line.eigen
+parsed: TElement PSingleton

@@ -1,0 +1,5 @@
+name: stale reference error
+features: bind function io
+stage: evaluate
+type: run-error
+expected: ()

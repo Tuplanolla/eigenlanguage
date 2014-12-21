@@ -1,0 +1,5 @@
+name: string literal
+features: constant
+stage: evaluate
+type: expression
+expected: 3
