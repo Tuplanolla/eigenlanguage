@@ -1,4 +1,5 @@
 name: simple data defitinion
+file: symbol.eigen
 features: constant data
 stage: evaluate
 type: expression

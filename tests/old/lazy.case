@@ -1,4 +1,5 @@
 name: lazy evaluation
+file: lazy.eigen
 features: arithmetic bind function lazy
 stage: evaluate
 type: expression

@@ -1,4 +1,5 @@
 name: lots of parentheses
+file: parentheses.eigen
 features: arithmetic
 stage: evaluate
 type: expression

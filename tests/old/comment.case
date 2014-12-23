@@ -1,4 +1,5 @@
 name: nothing but a comment
+file: comment.eigen
 features: comment nothing
 stage: evaluate
 type: expression

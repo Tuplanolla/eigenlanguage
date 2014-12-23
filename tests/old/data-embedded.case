@@ -1,4 +1,5 @@
 name: data definition with embedded code
+file: data-embedded.eigen
 features: arithmetic data
 stage: evaluate
 type: expression

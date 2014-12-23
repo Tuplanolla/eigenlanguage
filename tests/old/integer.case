@@ -1,4 +1,5 @@
 name: literal integer
+file: integer.eigen
 features: constant
 stage: evaluate
 type: expression

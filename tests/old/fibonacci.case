@@ -1,4 +1,5 @@
 name: Fibonacci numbers
+file: fibonacci.eigen
 features: arithmetic bind function if recursion tree-recursion
 stage: evaluate
 type: expression

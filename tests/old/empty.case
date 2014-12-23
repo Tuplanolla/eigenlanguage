@@ -1,4 +1,5 @@
 name: nothing at all
+file: empty.eigen
 features: nothing
 stage: evaluate
 type: expression

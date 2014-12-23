@@ -1,4 +1,5 @@
 name: literal nothing
+file: nothing.eigen
 features: constant nothing
 stage: evaluate
 type: expression

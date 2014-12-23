@@ -1,4 +1,5 @@
 name: string literal
+file: long-string.eigen
 features: constant
 stage: evaluate
 type: expression

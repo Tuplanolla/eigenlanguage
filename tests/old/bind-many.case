@@ -1,4 +1,5 @@
 name: many bound variables
+file: bind-many.eigen
 features: arithmetic bind
 stage: evaluate
 type: expression

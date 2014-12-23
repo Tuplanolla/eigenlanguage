@@ -1,4 +1,5 @@
 name: function defition with many parameters
+file: function-many.eigen
 features: arithmetic function
 stage: evaluate
 type: expression

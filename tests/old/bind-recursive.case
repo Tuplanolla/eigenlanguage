@@ -1,4 +1,5 @@
 name: recursively bound variables
+file: bind-recursive.eigen
 features: arithmetic bind recursion
 stage: evaluate
 type: expression

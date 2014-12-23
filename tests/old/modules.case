@@ -1,4 +1,5 @@
 name: modules
+file: modules.eigen
 features: module
 stage: evaluate
 type: expression

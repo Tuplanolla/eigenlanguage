@@ -1,4 +1,5 @@
 name: counter
+file: counter.eigen
 features: arithmetic bind function if recursion tail-recursion
 stage: evaluate
 type: expression

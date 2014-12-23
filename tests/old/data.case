@@ -1,4 +1,5 @@
 name: data definition
+file: data.eigen
 features: data
 stage: evaluate
 type: expression

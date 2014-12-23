@@ -1,4 +1,5 @@
 name: character literal
+file: character.eigen
 features: constant
 stage: evaluate
 type: expression

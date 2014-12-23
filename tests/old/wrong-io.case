@@ -1,4 +1,5 @@
 name: stale reference error
+file: wrong-io.eigen
 features: bind function io
 stage: evaluate
 type: run-error

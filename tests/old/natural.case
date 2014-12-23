@@ -1,4 +1,5 @@
 name: natural numbers
+file: natural.eigen
 features: arithmetic bind data function recursion
 stage: evaluate
 type: expression

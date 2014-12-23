@@ -1,4 +1,5 @@
 name: group comment
+file: group-comment.eigen
 features: arithmetic comment
 stage: evaluate
 type: expression

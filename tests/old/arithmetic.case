@@ -1,4 +1,5 @@
 name: basic arithmetic
+file: arithmetic.eigen
 features: arithmetic
 stage: evaluate
 type: expression

@@ -24,10 +24,6 @@ type ParserState = Seq (Location Warning)
 
 type StatefulParser = GenParser ParserState
 
-($>) :: Functor f => f a -> b -> f b
-($>) = flip (<$)
-infixl 4 $>
-
 parseCode :: Code -> Either Other.ParseError (Tree Parse)
 parseCode t = case runParser program Data.Sequence.empty "<interactive>" t of
                    Left _ -> Left PFFuckedUp -- Hides implementation details poorly.
