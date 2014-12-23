@@ -69,8 +69,8 @@ testCase fp tc = do putStrLn (name tc ++ ":")
 -- | A test description, file and expected values for various actions.
 data TestCase = TC {name :: String,
                     file :: FilePath,
-                    parsed :: Maybe (Tree Parse),
-                    compiled :: Maybe (Tree Expression),
+                    parsed :: Maybe (Either Char (Tree Parse)), -- Char -> ParseError...
+                    compiled :: Maybe (Tree Expression), -- CompilationError...
                     evaluated :: Maybe Expression,
                     performed :: Maybe Text}
               deriving (Show)

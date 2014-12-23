@@ -23,6 +23,8 @@ data Tree a = TElement a
 
 data Parse = PSymbol Symbol
            | PSingleton
+           | PBlockComment Code
+           | PLineComment Code
            | PTag Tag
            deriving (Eq, Read, Show)
 
@@ -48,9 +50,6 @@ data Expression = ESymbol Symbol
                 | ELogical Bool
                 | EInteger Integer
                 | ECharacter Char
-                | ESyntacticComment Expression
-                | EBlockComment Code
-                | ELineComment Code
                 | ETag Tag Expression
                 | ENothing
                 deriving Show
@@ -193,6 +192,9 @@ data ParseWarning = PWSpaceAfterLeftParenthesis
                   | PWExtraParentheses
                   | PWExtraBrackets
                   | PWNoDocumentation
+                  --
+                  | PWUnexpectedSpaces Nat
+                  | PWIllegalCharacter Char
                   deriving (Eq, Read, Show)
 
 -- | Essentially @[(Symbol, Expression)]@ without ordering.

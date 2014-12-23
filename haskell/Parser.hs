@@ -6,9 +6,10 @@ module Parser where
 import Control.Applicative ((<$>), (<*>), (*>), (<*), (<$), pure)
 import Control.Monad
 import Data.Char
-import Data.Map hiding (foldl, foldr)
-import Data.Sequence
-import Data.Text.Lazy hiding (foldl, foldr, group)
+import Data.Map hiding (foldl, foldr, singleton)
+import Data.Monoid
+import Data.Sequence hiding (length, singleton)
+import Data.Text.Lazy hiding (foldl, foldr, group, length)
 import Text.Parsec hiding (parse)
 import Text.Parsec.Prim hiding (parse)
 import Text.Parsec.Pos
@@ -29,35 +30,62 @@ parseCode t = case runParser program Data.Sequence.empty "<interactive>" t of
                    Left _ -> Left PFFuckedUp -- Hides implementation details poorly.
                    Right x -> Right x
 
-rawParse :: Code -> Either ParseError (ParserState, Tree Parse)
-rawParse = runParser (withState program) Data.Sequence.empty "<interactive>"
-
 withState p = flip (,) <$> p <*> getState
 
-mediumParse :: StatefulParser (Tree Parse) -> Code -> Either ParseError (Tree Parse)
-mediumParse p = runParser p Data.Sequence.empty "<interactive>"
-
-program :: StatefulParser (Tree Parse)
-program = group foldl <* eof
-
-expression :: StatefulParser (Tree Parse)
-expression = between (char '(') (char ')') (group foldl)
-             <|> between (char '[') (char ']') (group foldr)
-             <|> {- warnHere PWDubiousName *> -} (TElement <$> try symbol)
+warn :: Location Warning -> StatefulParser ()
+warn = modifyState . flip (|>)
 
 warnHere :: ParseWarning -> StatefulParser ()
 warnHere w = getPosition >>= warn . f
  where f p = LLocation (sourceName p) (sourceLine p) (sourceColumn p) (WParse w)
 
-warn :: Location Warning -> StatefulParser ()
-warn = modifyState . flip (|>)
+rawParse :: Code -> Either ParseError (ParserState, Tree Parse)
+rawParse = runParser (withState program) Data.Sequence.empty "<interactive>" . strip
 
-group f = join between (many invisible)
-          (f TPair (TElement PSingleton)
-           <$> sepEndBy expression (many1 invisible))
+mediumParse :: StatefulParser (Tree Parse) -> Code -> Either ParseError (ParserState, Tree Parse)
+mediumParse p = runParser (withState p) Data.Sequence.empty "<interactive>"
+
+program :: StatefulParser (Tree Parse)
+program = group foldl <* eof
+
+expression :: StatefulParser (Tree Parse)
+expression = pleaseNoInvisible *> expression
+             <|> pleaseNoIllegal *> expression
+             <|> TPair . TElement . PSymbol . singleton <$> char '`' <*> expression
+             <|> TPair . TElement . PSymbol . singleton <$> char ',' <*> expression
+             <|> between (char '(') (pleaseFixI (char ')')) (pleaseFixI (group foldl))
+             <|> between (char '[') (pleaseFixI (char ']')) (pleaseFixI (group foldr))
+             <|> char '%' *> (TElement . PLineComment
+                                       . pack <$> (char ' ' *> to endOfLine
+                                                   <|> mempty <$ endOfLine
+                                                   <?> "end of line")
+                              <|> TElement . PBlockComment
+                                           . pack
+                                  <$> (char '%' *> past (try (string "%%")))
+                              <|> TPair (TElement (PSymbol "%")) <$> expression
+                              <?> "end of comment")
+             <|> TElement <$> try symbol
+
+to = manyTill anyChar . lookAhead
+
+past = manyTill anyToken . try
+
+pleaseNoInvisible = PWUnexpectedSpaces . length <$> many1 invisible >>= warnHere
+
+pleaseNoIllegal = PWIllegalCharacter <$> forbidden >>= warnHere
+
+pleaseFixI p = try (pleaseNoInvisible *> pleaseFixI p) <|> p
+
+pleaseFix n p = try (n *> pleaseFix n p) <|> p
+
+-- Should use sepBy here.
+group f = f TPair (TElement PSingleton) <$> sepEndBy expression (pleaseFixI invisible)
+
+forbidden :: StatefulParser Char
+forbidden = oneOf "¤\0" -- The first one is for testing.
 
 invisible :: StatefulParser Char
-invisible = oneOf " \n\r"
+invisible = oneOf "\t\n\r "
 
 symbol :: StatefulParser Parse
 symbol = PSymbol . pack <$> many1 (noneOf "()[]`,% \n\r")
