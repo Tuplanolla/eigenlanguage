@@ -1,0 +1,3 @@
+name: empty file with one block comment
+file: only-block-comment.eigen
+parsed: Right (TPair (TElement PSingleton) (TElement (PBlockComment " block\ncomment ")))

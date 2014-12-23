@@ -1,0 +1,3 @@
+name: empty file with one line comment
+file: only-line-comment.eigen
+parsed: Right (TPair (TElement PSingleton) (TElement (PLineComment "line comment")))

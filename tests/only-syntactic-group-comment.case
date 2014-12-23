@@ -1,0 +1,3 @@
+name: empty file with one syntactic group comment
+file: only-syntactic-group-comment.eigen
+parsed: Right (TElement (PSyntacticComment (TPair (TPair (TPair (TElement PSingleton) (TElement (PSymbol "many"))) (TElement (PSymbol "symbols"))) (TPair (TPair (TElement PSingleton) (TElement (PSymbol "and"))) (TElement (PSymbol "groups"))))))
