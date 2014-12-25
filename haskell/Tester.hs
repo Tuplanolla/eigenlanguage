@@ -3,6 +3,7 @@
 module Tester where
 
 import Control.Applicative ((<$>), (<*>), (*>), (<*), (<$), pure)
+import qualified Control.Applicative as CA ((<|>))
 import Control.Arrow
 import Control.Monad hiding (sequence)
 import Data.Function
@@ -31,20 +32,21 @@ import Parser
 import Data hiding (ParseError)
 
 main :: IO ()
-main = getArgs >>= mapM_ testAll
+main = getArgs >>= mapM_ (testAll 0)
 
 help :: IO ()
 help = do s <- getProgName
           putStrLn ("Usage: " ++ s ++ " [file] [...]")
 
-testAll :: FilePath -> IO ()
-testAll fp = do f <- doesFileExist fp
-                d <- doesDirectoryExist fp
-                case (f, d) of
-                     (True, False) -> when (takeExtension fp == ".case") (test fp)
-                     (False, True) -> do fps <- filter (not . isDot) <$> getDirectoryContents fp
-                                         mapM_ (testAll . (fp </>)) fps
-                     _ -> error (show (f, d))
+testAll :: Nat -> FilePath -> IO ()
+testAll l fp = do f <- doesFileExist fp
+                  d <- doesDirectoryExist fp
+                  case (f, d) of
+                       (True, False) -> when (takeExtension fp == ".case") (test fp)
+                       (False, True) -> do fps <- filter (not . isDot) <$> getDirectoryContents fp
+                                           let l' = if l > 0 then pred l else l
+                                           when (l /= 0) (mapM_ (testAll l' . (fp </>)) fps)
+                       _ -> error (show (f, d))
 
 isDot :: FilePath -> Bool
 isDot (x : _) = x == '.'
@@ -60,16 +62,22 @@ test fp = do t <- readFile fp
 
 testCase :: FilePath -> TestCase -> IO ()
 testCase fp tc = do putStrLn (name tc ++ ":")
-                    -- Dispatch stages here instead.
-                    x <- rawParse <$> readFile (takeDirectory fp </> file tc)
-                    case x of
-                         Left pe -> print pe
-                         Right x -> putStrLn "parsed just fine"
+                    -- Remove CA.<|> to dispatch properly.
+                    case parsed tc CA.<|> Just (Right (TElement (PLineComment "missing"))) of
+                         -- Handle missing file later.
+                         Just p -> do x <- (snd <$>) . rawParse <$> readFile (takeDirectory fp </> file tc)
+                                      let r = left (const ()) x
+                                      if r == p then
+                                         putStrLn "parsed and matched" else
+                                         do putStrLn "failed to match these"
+                                            print p
+                                            print x
+                         _ -> putStrLn "nothing to do"
 
 -- | A test description, file and expected values for various actions.
 data TestCase = TC {name :: String,
                     file :: FilePath,
-                    parsed :: Maybe (Either Char (Tree Parse)), -- Char -> ParseError...
+                    parsed :: Maybe (Either () (Tree Parse)), -- () -> ParseError...
                     compiled :: Maybe (Tree Expression), -- CompilationError...
                     evaluated :: Maybe Expression,
                     performed :: Maybe Text}

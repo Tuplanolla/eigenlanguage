@@ -1,0 +1,3 @@
+name: block string
+file: only-block-string.eigen
+parsed: Right (TElement (PString "block\nstring"))

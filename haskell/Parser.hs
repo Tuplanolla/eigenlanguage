@@ -9,7 +9,7 @@ import Data.Char
 import Data.Map hiding (foldl, foldr, singleton)
 import Data.Monoid
 import Data.Sequence hiding (length, singleton)
-import Data.Text.Lazy hiding (foldl, foldr, group, length)
+import Data.Text.Lazy hiding (concat, foldl, foldr, group, head, length)
 import Text.Parsec hiding (parse)
 import Text.Parsec.Prim hiding (parse)
 import Text.Parsec.Pos
@@ -46,8 +46,11 @@ mediumParse :: StatefulParser (Tree Parse) -> Code -> Either ParseError (ParserS
 mediumParse p = runParser (withState p) Data.Sequence.empty "<interactive>"
 
 program :: StatefulParser (Tree Parse)
-program = group foldl <* eof
+program = dirtyTrick <$> (group foldl <* eof)
+ where dirtyTrick (TPair (TElement PSingleton) x) = x
+       dirtyTrick x = x
 
+-- This is terrible and dies to corner cases like "e%x(press ion)% comment".
 expression :: StatefulParser (Tree Parse)
 expression = pleaseNoInvisible *> expression
              <|> pleaseNoIllegal *> expression
@@ -56,15 +59,41 @@ expression = pleaseNoInvisible *> expression
              <|> between (char '(') (pleaseFixI (char ')')) (pleaseFixI (group foldl))
              <|> between (char '[') (pleaseFixI (char ']')) (pleaseFixI (group foldr))
              <|> char '%' *> (TElement . PLineComment
-                                       . pack <$> (char ' ' *> to endOfLine
-                                                   <|> mempty <$ endOfLine
+                                       . pack <$> (char ' ' *> to end
+                                                   <|> mempty <$ end
                                                    <?> "end of line")
                               <|> TElement . PBlockComment
                                            . pack
-                                  <$> (char '%' *> past (try (string "%%")))
+                                  <$> (char '%' *> past (string "%%"))
                               <|> TPair (TElement (PSymbol "%")) <$> expression
                               <?> "end of comment")
+             <|> TElement . PCharacter . characterify <$> (char '\'' *> past (char '\''))
+             <|> TElement . PString . stringify <$> (char '"' *> past (char '"'))
              <|> TElement <$> try symbol
+
+-- | Convert the name of a character into an actual character.
+characterify :: String -> Char
+characterify = head
+
+-- | Convert escape sequences into characters.
+-- Should put this into the main parser.
+stringify :: String -> String
+stringify s = case runParser escapist () [] s of
+                   Left _ -> error "wrong, dead"
+                   Right s -> s
+
+escapist = mempty <$ eof
+           <|> (:) '%' <$ try (string "%%")
+                       <*> escapist
+           -- The same as lowercase hexDigit.
+           <|> (:) . chr . read . ("0x" ++) <$> join between (char '%') (many1 (oneOf (['0' .. '9'] ++ ['a' .. 'f'])))
+                                            <*> escapist
+           <|> (:) <$> anyChar
+                   <*> escapist
+
+notExactly = noneOf . pure
+
+end = () <$ endOfLine <|> eof
 
 to = manyTill anyChar . lookAhead
 

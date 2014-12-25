@@ -23,6 +23,8 @@ data Tree a = TElement a
 
 data Parse = PSymbol Symbol
            | PSingleton
+           | PCharacter Char
+           | PString String
            | PBlockComment Code
            | PLineComment Code
            | PTag Tag
